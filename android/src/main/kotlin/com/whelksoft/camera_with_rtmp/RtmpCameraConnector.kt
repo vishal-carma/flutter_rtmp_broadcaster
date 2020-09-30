@@ -147,6 +147,7 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
         Log.i(TAG, "prepareGlInterface " + rotation + " " + isPortrait);
         this.glInterface.setEncoderSize(videoEncoder!!.width, videoEncoder!!.height)
         this.glInterface.setRotation(rotation)
+        this.glInterface.isKeepAspectRatio = true
         this.glInterface.start()
     }
 

@@ -56,7 +56,8 @@ class Camera(
     private val maxRetries = 3
     private var currentRetries = 0
     private var publishUrl: String? = null
-    private val aspectRatio: Double = 5.0/6.0
+//    private val aspectRatio: Double = 4.0/5.0
+    private val aspectRatio: Double = 1.0
 
     // Mirrors camera.dart
     enum class ResolutionPreset {
@@ -690,7 +691,7 @@ class Camera(
         currentOrientation = Math.round(activity.resources.configuration.orientation / 90.0).toInt() * 90
         val preset = ResolutionPreset.valueOf(resolutionPreset!!)
         recordingProfile = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, preset)
-        recordingProfile.videoFrameWidth = (recordingProfile.videoFrameWidth * aspectRatio).toInt()
+        recordingProfile.videoFrameWidth = (recordingProfile.videoFrameHeight * aspectRatio).toInt()
 
         captureSize = Size(recordingProfile.videoFrameWidth, recordingProfile.videoFrameHeight)
         previewSize = CameraUtils.computeBestPreviewSize(cameraName, preset)
@@ -698,7 +699,7 @@ class Camera(
         // Data for streaming, different than the recording data.
         val streamPreset = ResolutionPreset.valueOf(streamingPreset!!)
         streamingProfile = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, streamPreset)
-        streamingProfile.videoFrameWidth = (streamingProfile.videoFrameWidth * aspectRatio).toInt()
+        streamingProfile.videoFrameWidth = (streamingProfile.videoFrameHeight * aspectRatio).toInt()
     }
 
     override fun onAuthSuccessRtmp() {
