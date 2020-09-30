@@ -12,11 +12,10 @@ import android.media.ImageReader
 import android.os.Build
 import android.util.Log
 import android.util.Size
-import android.util.SparseIntArray
 import android.view.OrientationEventListener
 import android.view.Surface
-import android.view.WindowManager
 import androidx.annotation.RequiresApi
+import com.pedro.encoder.video.FormatVideoEncoder
 import com.pedro.rtplibrary.util.BitrateAdapter
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.EventChannel.EventSink
@@ -57,11 +56,14 @@ class Camera(
     private val maxRetries = 3
     private var currentRetries = 0
     private var publishUrl: String? = null
+    private val aspectRatio: Double = 5.0/6.0
 
     // Mirrors camera.dart
     enum class ResolutionPreset {
         low, medium, high, veryHigh, ultraHigh, max
     }
+
+    private val formatVideoEncoder = FormatVideoEncoder.YUV420Dynamical
 
     @Throws(IOException::class)
     private fun prepareCameraForRecordAndStream(fps: Int, bitrate: Int?) {
@@ -332,11 +334,16 @@ class Camera(
         try {
             currentRetries = 0
             publishUrl = null
-            if (rtmpCamera != null) {
-                rtmpCamera!!.stopRecord()
-                rtmpCamera!!.stopStream()
-                rtmpCamera = null
+            rtmpCamera?.apply {
+//                if (isStreaming) {
+//                    stopStream()
+//                }
+                if (isRecording) {
+                    stopRecord()
+                }
             }
+            rtmpCamera = null
+
 
             startPreview()
             result.success(null)
@@ -683,12 +690,15 @@ class Camera(
         currentOrientation = Math.round(activity.resources.configuration.orientation / 90.0).toInt() * 90
         val preset = ResolutionPreset.valueOf(resolutionPreset!!)
         recordingProfile = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, preset)
+        recordingProfile.videoFrameWidth = (recordingProfile.videoFrameWidth * aspectRatio).toInt()
+
         captureSize = Size(recordingProfile.videoFrameWidth, recordingProfile.videoFrameHeight)
         previewSize = CameraUtils.computeBestPreviewSize(cameraName, preset)
 
         // Data for streaming, different than the recording data.
         val streamPreset = ResolutionPreset.valueOf(streamingPreset!!)
         streamingProfile = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, streamPreset)
+        streamingProfile.videoFrameWidth = (streamingProfile.videoFrameWidth * aspectRatio).toInt()
     }
 
     override fun onAuthSuccessRtmp() {

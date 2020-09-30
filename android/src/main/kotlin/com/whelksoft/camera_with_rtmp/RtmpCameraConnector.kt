@@ -1,16 +1,12 @@
 package com.whelksoft.camera_with_rtmp
 
 import android.content.Context
-import android.hardware.camera2.CameraCharacteristics
-import android.media.ImageReader
 import android.media.MediaCodec
 import android.media.MediaFormat
 import android.os.Build
-import android.util.Size
-import android.view.MotionEvent
+import android.util.Log
+import android.util.SparseIntArray
 import android.view.Surface
-import android.view.SurfaceView
-import android.view.TextureView
 import androidx.annotation.RequiresApi
 import com.pedro.encoder.Frame
 import com.pedro.encoder.audio.AudioEncoder
@@ -18,25 +14,15 @@ import com.pedro.encoder.audio.GetAacData
 import com.pedro.encoder.input.audio.CustomAudioEffect
 import com.pedro.encoder.input.audio.GetMicrophoneData
 import com.pedro.encoder.input.audio.MicrophoneManager
-import com.pedro.encoder.input.video.CameraHelper
-import com.pedro.encoder.input.video.CameraHelper.Facing
-import com.pedro.encoder.input.video.CameraOpenException
 import com.pedro.encoder.utils.CodecUtil.Force
 import com.pedro.encoder.video.FormatVideoEncoder
 import com.pedro.encoder.video.GetVideoData
 import com.pedro.rtplibrary.util.FpsListener
 import com.pedro.rtplibrary.util.RecordController
-import com.pedro.rtplibrary.view.GlInterface
-import com.pedro.rtplibrary.view.LightOpenGlView
 import com.pedro.rtplibrary.view.OffScreenGlThread
-import com.pedro.rtplibrary.view.OpenGlView
 import net.ossrs.rtmp.ConnectCheckerRtmp
 import net.ossrs.rtmp.SrsFlvMuxer
-import java.io.IOException
 import java.nio.ByteBuffer
-import java.util.*
-import android.util.Log
-import android.util.SparseIntArray
 
 
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -231,17 +217,19 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
     }
 
     fun stopRecord() {
+        if (isRecording) {
+            recordController.stopRecord()
+        }
         isRecording = false
-        recordController.stopRecord()
         if (!isStreaming) {
             stopStream()
         }
     }
 
     fun startEncoders() {
-        videoEncoder!!.start()
-        audioEncoder!!.start()
-        microphoneManager!!.start()
+        audioEncoder.start()
+        microphoneManager.start()
+        videoEncoder?.start()
     }
 
     private fun resetVideoEncoder() {
@@ -253,8 +241,10 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
      * Stop stream started with @startStream.
      */
     fun stopStream() {
-        isStreaming = false
-        stopStreamRtp()
+        if (isStreaming) {
+            isStreaming = false
+            stopStreamRtp()
+        }
         if (!isRecording) {
            microphoneManager!!.stop()
            videoEncoder!!.stop()
@@ -460,9 +450,11 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
     }
 
     override fun onVideoFormat(mediaFormat: MediaFormat) {
+        recordController.setVideoFormat(mediaFormat)
     }
 
     override fun onAudioFormat(mediaFormat: MediaFormat) {
+        recordController.setAudioFormat(mediaFormat)
     }
 
     fun getAacDataRtp(aacBuffer: ByteBuffer, info: MediaCodec.BufferInfo) {
@@ -482,6 +474,7 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
     }
 
     override fun onStatusChange(status: RecordController.Status) {
+        Log.d("TAG", "Recorder status: $status")
     }
 
 

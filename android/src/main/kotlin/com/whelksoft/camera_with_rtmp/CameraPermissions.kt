@@ -24,7 +24,7 @@ internal class CameraPermissions {
         if (ongoing) {
             callback.onResult("cameraPermission", "Camera permission request ongoing")
         }
-        if (!hasCameraPermission(activity) || enableAudio && !hasAudioPermission(activity)) {
+        if (!hasCameraPermission(activity) || enableAudio && !hasAudioPermission(activity) || !hasWriteExternalStoragePermission(activity)) {
             permissionsRegistry.adddListener(
                     CameraRequestPermissionsListener(
                             object : ResultCallback {
@@ -36,7 +36,7 @@ internal class CameraPermissions {
             ongoing = true
             ActivityCompat.requestPermissions(
                     activity,
-                    if (enableAudio) arrayOf(permission.CAMERA, permission.RECORD_AUDIO) else arrayOf(permission.CAMERA),
+                    if (enableAudio) arrayOf(permission.CAMERA, permission.RECORD_AUDIO, permission.WRITE_EXTERNAL_STORAGE) else arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE),
                     CAMERA_REQUEST_ID)
         } else {
             // Permissions already exist. Call the callback with success.
@@ -51,6 +51,11 @@ internal class CameraPermissions {
 
     private fun hasAudioPermission(activity: Activity): Boolean {
         return (ContextCompat.checkSelfPermission(activity, permission.RECORD_AUDIO)
+                == PackageManager.PERMISSION_GRANTED)
+    }
+
+    private fun hasWriteExternalStoragePermission(activity: Activity): Boolean {
+        return (ContextCompat.checkSelfPermission(activity, permission.WRITE_EXTERNAL_STORAGE)
                 == PackageManager.PERMISSION_GRANTED)
     }
 
