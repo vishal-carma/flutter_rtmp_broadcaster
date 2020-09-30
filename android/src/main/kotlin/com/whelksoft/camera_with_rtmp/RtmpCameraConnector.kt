@@ -121,11 +121,11 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
     @JvmOverloads
     fun prepareVideo(width: Int, height: Int, fps: Int, bitrate: Int, hardwareRotation: Boolean,
                      iFrameInterval: Int, rotation: Int, avcProfile: Int = -1, avcProfileLevel: Int =
-                             -1): Boolean {
+                             -1, aspectRatio: Double = 1.0): Boolean {
         pausedStreaming = false
         pausedRecording = false
         videoEncoder = VideoEncoder(
-                this, width, height, fps, bitrate, if (useOpenGL) 0 else rotation, hardwareRotation, iFrameInterval, FormatVideoEncoder.SURFACE, avcProfile, avcProfileLevel)
+                this, width, height, fps, bitrate, if (useOpenGL) 0 else rotation, hardwareRotation, iFrameInterval, FormatVideoEncoder.SURFACE, avcProfile, avcProfileLevel, aspectRatio)
 
         val result = videoEncoder!!.prepare()
         if (useOpenGL) {
@@ -139,15 +139,14 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
      * backward compatibility reason
      */
     fun prepareVideo(width: Int, height: Int, fps: Int, bitrate: Int, hardwareRotation: Boolean,
-                     rotation: Int): Boolean {
-        return prepareVideo(width, height, fps, bitrate, hardwareRotation, 2, rotation)
+                     rotation: Int, aspectRatio: Double): Boolean {
+        return prepareVideo(width, height, fps, bitrate, hardwareRotation, 2, rotation, aspectRatio = aspectRatio)
     }
 
     private fun prepareGlInterface(rotation: Int) {
         Log.i(TAG, "prepareGlInterface " + rotation + " " + isPortrait);
         this.glInterface.setEncoderSize(videoEncoder!!.width, videoEncoder!!.height)
         this.glInterface.setRotation(rotation)
-        this.glInterface.isKeepAspectRatio = true
         this.glInterface.start()
     }
 

@@ -56,8 +56,8 @@ class Camera(
     private val maxRetries = 3
     private var currentRetries = 0
     private var publishUrl: String? = null
-//    private val aspectRatio: Double = 4.0/5.0
-    private val aspectRatio: Double = 1.0
+
+    private val aspectRatio: Double = 4.0 / 5.0
 
     // Mirrors camera.dart
     enum class ResolutionPreset {
@@ -72,12 +72,12 @@ class Camera(
             rtmpCamera!!.stopStream()
             rtmpCamera = null
         }
-        Log.i(TAG, "prepareCameraForRecordAndStream(opengl=" + useOpenGL+ ", portrait: " + isPortrait +   ", currentOrientation: " + currentOrientation + ", mediaOrientation: " + mediaOrientation
-         + ", frontfacing: " + isFrontFacing + ")" )
+        Log.i(TAG, "prepareCameraForRecordAndStream(opengl=" + useOpenGL + ", portrait: " + isPortrait + ", currentOrientation: " + currentOrientation + ", mediaOrientation: " + mediaOrientation
+                + ", frontfacing: " + isFrontFacing + ")")
         rtmpCamera = RtmpCameraConnector(
                 context = activity!!.applicationContext!!,
                 useOpenGL = useOpenGL,
-                isPortrait =  isPortrait,
+                isPortrait = isPortrait,
                 connectChecker = this)
 
         // Turn on audio if it is requested.
@@ -97,7 +97,8 @@ class Camera(
                 fps,
                 bitrateToUse,
                 !useOpenGL,
-                mediaOrientation)
+                mediaOrientation,
+                aspectRatio)
     }
 
 
@@ -436,7 +437,7 @@ class Camera(
         createCaptureSession(
                 CameraDevice.TEMPLATE_PREVIEW,
                 Runnable { },
-        pictureImageReader!!.surface)
+                pictureImageReader!!.surface)
     }
 
     @Throws(CameraAccessException::class)
@@ -463,7 +464,8 @@ class Camera(
     private fun setImageStreamImageAvailableListener(imageStreamSink: EventSink) {
         imageStreamReader!!.setOnImageAvailableListener(
                 { reader: ImageReader ->
-                    val img = reader.acquireLatestImage() ?: return@setOnImageAvailableListener
+                    val img = reader.acquireLatestImage()
+                            ?: return@setOnImageAvailableListener
                     val planes: MutableList<Map<String, Any>> = ArrayList()
                     for (plane in img.planes) {
                         val buffer = plane.buffer
@@ -643,7 +645,7 @@ class Camera(
 
 
     private val mediaOrientation: Int
-         get() {
+        get() {
             val sensorOrientationOffset = if (isFrontFacing)
                 -currentOrientation
             else
@@ -691,7 +693,8 @@ class Camera(
         currentOrientation = Math.round(activity.resources.configuration.orientation / 90.0).toInt() * 90
         val preset = ResolutionPreset.valueOf(resolutionPreset!!)
         recordingProfile = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, preset)
-        recordingProfile.videoFrameWidth = (recordingProfile.videoFrameHeight * aspectRatio).toInt()
+        // Hotfix changed stream size
+        recordingProfile.videoFrameWidth = recordingProfile.videoFrameHeight
 
         captureSize = Size(recordingProfile.videoFrameWidth, recordingProfile.videoFrameHeight)
         previewSize = CameraUtils.computeBestPreviewSize(cameraName, preset)
@@ -699,7 +702,8 @@ class Camera(
         // Data for streaming, different than the recording data.
         val streamPreset = ResolutionPreset.valueOf(streamingPreset!!)
         streamingProfile = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, streamPreset)
-        streamingProfile.videoFrameWidth = (streamingProfile.videoFrameHeight * aspectRatio).toInt()
+        // Hotfix changed stream size
+        streamingProfile.videoFrameWidth = streamingProfile.videoFrameHeight
     }
 
     override fun onAuthSuccessRtmp() {

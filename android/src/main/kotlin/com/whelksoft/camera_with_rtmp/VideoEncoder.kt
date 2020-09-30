@@ -1,6 +1,5 @@
 package com.whelksoft.camera_with_rtmp
 
-import android.graphics.ImageFormat
 import android.media.MediaCodec
 import android.media.MediaCodecInfo
 import android.media.MediaFormat
@@ -36,7 +35,8 @@ class VideoEncoder(
         val iFrameInterval: Int,
         val formatVideoEncoder: FormatVideoEncoder,
         val avcProfile: Int = -1,
-        val avcProfileLevel: Int = -1) {
+        val avcProfileLevel: Int = -1,
+        val aspectRatio: Double = 1.0) {
     private var spsPpsSetted = false
 
     // surface to buffer encoder
@@ -82,8 +82,10 @@ class VideoEncoder(
             val videoFormat: MediaFormat
             //if you dont use mediacodec rotation you need swap width and height in rotation 90 or 270
             // for correct encoding resolution
-            val resolution: String = "" + width + "x" + height
-            videoFormat = MediaFormat.createVideoFormat(type, width, height)
+            val ratioWidth = (width * aspectRatio).toInt()
+            val resolution: String = "" + ratioWidth + "x" + height
+
+            videoFormat = MediaFormat.createVideoFormat(type, ratioWidth, height)
             Log.i(TAG, "Prepare video info: " + videoEncoder!!.name.toString() + ", " + resolution)
             videoFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, videoEncoder!!.getFormatCodec())
             videoFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 0)
