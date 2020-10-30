@@ -80,12 +80,13 @@ class VideoEncoder(
                 return false
             }
             val videoFormat: MediaFormat
-            //if you dont use mediacodec rotation you need swap width and height in rotation 90 or 270
+            // if you don't use mediacodec rotation you need swap width and height in rotation 90 or 270
             // for correct encoding resolution
-            val ratioWidth = (width * aspectRatio).toInt()
-            val resolution: String = "" + ratioWidth + "x" + height
+            val ratioWidth = width
+            val ratioHeight = height
+            val resolution: String = "" + ratioWidth + "x" + ratioHeight
 
-            videoFormat = MediaFormat.createVideoFormat(type, ratioWidth, height)
+            videoFormat = MediaFormat.createVideoFormat(type, ratioWidth, ratioHeight)
             Log.i(TAG, "Prepare video info: " + videoEncoder!!.name.toString() + ", " + resolution)
             videoFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, videoEncoder!!.getFormatCodec())
             videoFormat.setInteger(MediaFormat.KEY_MAX_INPUT_SIZE, 0)

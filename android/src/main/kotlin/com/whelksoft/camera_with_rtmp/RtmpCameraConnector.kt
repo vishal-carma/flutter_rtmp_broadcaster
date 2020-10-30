@@ -28,7 +28,7 @@ import java.nio.ByteBuffer
 @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
 class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPortrait: Boolean, val connectChecker: ConnectCheckerRtmp) :
         GetAacData, GetVideoData, GetMicrophoneData, FpsListener.Callback,
-        RecordController.Listener,  ConnectCheckerRtmp {
+        RecordController.Listener, ConnectCheckerRtmp {
     private var videoEncoder: VideoEncoder? = null
     private var microphoneManager: MicrophoneManager
     private var audioEncoder: AudioEncoder
@@ -129,7 +129,7 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
 
         val result = videoEncoder!!.prepare()
         if (useOpenGL) {
-            prepareGlInterface(ORIENTATIONS[rotation])
+            prepareGlInterface(ORIENTATIONS[rotation], aspectRatio)
             glInterface.addMediaCodecSurface(videoEncoder!!.surface)
         }
         return result
@@ -140,12 +140,13 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
      */
     fun prepareVideo(width: Int, height: Int, fps: Int, bitrate: Int, hardwareRotation: Boolean,
                      rotation: Int, aspectRatio: Double): Boolean {
-        return prepareVideo(width, height, fps, bitrate, hardwareRotation, 2, rotation, aspectRatio = aspectRatio)
+        return prepareVideo(512, 640, fps, bitrate, hardwareRotation, 2, rotation, aspectRatio = aspectRatio)
     }
 
-    private fun prepareGlInterface(rotation: Int) {
-        Log.i(TAG, "prepareGlInterface " + rotation + " " + isPortrait);
+    private fun prepareGlInterface(rotation: Int, aspectRatio: Double) {
+        Log.i(TAG, "prepareGlInterface $rotation $isPortrait")
         this.glInterface.setEncoderSize(videoEncoder!!.width, videoEncoder!!.height)
+        this.glInterface.setPreviewSize(videoEncoder!!.width, videoEncoder!!.height)
         this.glInterface.setRotation(rotation)
         this.glInterface.start()
     }
@@ -246,10 +247,10 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
             stopStreamRtp()
         }
         if (!isRecording) {
-           microphoneManager!!.stop()
-           videoEncoder!!.stop()
-           audioEncoder!!.stop()
-           glInterface.stop()
+            microphoneManager!!.stop()
+            videoEncoder!!.stop()
+            audioEncoder!!.stop()
+            glInterface.stop()
         }
     }
 
@@ -442,7 +443,8 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
     override fun getVideoData(h264Buffer: ByteBuffer, info: MediaCodec.BufferInfo) {
         fpsListener.calculateFps()
         if (isStreaming && !pausedStreaming) getH264DataRtp(h264Buffer, info)
-        if (isRecording && !pausedRecording) recordController.recordVideo(h264Buffer, info)
+//        if (isRecording && !pausedRecording) recordController.recordVideo(h264Buffer, info)
+        recordController.recordVideo(h264Buffer, info)
     }
 
     override fun inputPCMData(frame: Frame) {
@@ -469,7 +471,7 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
         srsFlvMuxer.sendVideo(h264Buffer, info)
     }
 
-   override fun  onFps(fps: Int) {
+    override fun onFps(fps: Int) {
         curFps = fps
     }
 

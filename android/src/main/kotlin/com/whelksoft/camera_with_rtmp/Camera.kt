@@ -27,6 +27,8 @@ import java.io.FileOutputStream
 import java.io.IOException
 import java.nio.ByteBuffer
 import java.util.*
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
 @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
 class Camera(
@@ -235,7 +237,6 @@ class Camera(
     ) {
         // Close the old session first.
         closeCaptureSession()
-
         Log.v("Camera", "createCaptureSession " + previewSize.width + "x" + previewSize.height + " mediaOrientation: " + mediaOrientation + " currentOrientation: " + currentOrientation + " sensorOrientation: " + sensorOrientation + " porteait: " + isPortrait)
 
         // Create a new capture builder.
@@ -490,7 +491,7 @@ class Camera(
 
     private fun closeCaptureSession() {
         if (cameraCaptureSession != null) {
-            Log.v("Camera", "Close recoordingCaptureSession")
+            Log.v("Camera", "Close recordingCaptureSession")
             try {
                 cameraCaptureSession!!.stopRepeating()
                 cameraCaptureSession!!.abortCaptures()
@@ -693,8 +694,6 @@ class Camera(
         currentOrientation = Math.round(activity.resources.configuration.orientation / 90.0).toInt() * 90
         val preset = ResolutionPreset.valueOf(resolutionPreset!!)
         recordingProfile = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, preset)
-        // Hotfix changed stream size
-        recordingProfile.videoFrameWidth = recordingProfile.videoFrameHeight
 
         captureSize = Size(recordingProfile.videoFrameWidth, recordingProfile.videoFrameHeight)
         previewSize = CameraUtils.computeBestPreviewSize(cameraName, preset)
@@ -702,8 +701,6 @@ class Camera(
         // Data for streaming, different than the recording data.
         val streamPreset = ResolutionPreset.valueOf(streamingPreset!!)
         streamingProfile = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, streamPreset)
-        // Hotfix changed stream size
-        streamingProfile.videoFrameWidth = streamingProfile.videoFrameHeight
     }
 
     override fun onAuthSuccessRtmp() {
