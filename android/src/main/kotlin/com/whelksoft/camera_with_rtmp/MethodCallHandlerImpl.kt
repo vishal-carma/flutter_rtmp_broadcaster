@@ -3,13 +3,13 @@ package com.whelksoft.camera_with_rtmp
 import android.app.Activity
 import android.hardware.camera2.CameraAccessException
 import android.os.Build
-import io.flutter.Log
+import android.util.Log
+import android.util.LongSparseArray
 import androidx.annotation.RequiresApi
 import com.whelksoft.camera_with_rtmp.CameraPermissions.ResultCallback
 import io.flutter.plugin.common.*
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.view.TextureRegistry
-
 
 internal class MethodCallHandlerImpl(
         private val activity: Activity,
@@ -19,20 +19,21 @@ internal class MethodCallHandlerImpl(
         private val textureRegistry: TextureRegistry) : MethodCallHandler {
     private val methodChannel: MethodChannel
     private val imageStreamChannel: EventChannel
+//    private var camera: CameraWrapper? = null
     private var camera: Camera? = null
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
     override fun onMethodCall(call: MethodCall, result: MethodChannel.Result) {
         when (call.method) {
             "availableCameras" -> try {
+                Log.i("Stuff", "availableCameras")
                 result.success(CameraUtils.getAvailableCameras(activity))
             } catch (e: Exception) {
                 handleException(e, result)
             }
             "initialize" -> {
-                if (camera != null) {
-                    camera!!.close()
-                }
+                Log.i("Stuff", "initialize")
+                camera?.close()
                 cameraPermissions.requestPermissions(
                         activity,
                         permissionsRegistry,
@@ -52,87 +53,101 @@ internal class MethodCallHandlerImpl(
                         })
             }
             "takePicture" -> {
-                camera!!.takePicture(call.argument("path")!!, result)
+//                camera?.takePicture(call.argument("path")!!, result)
+                Log.i("Stuff", "takePicture")
+                result.success(null)
             }
             "prepareForVideoRecording" -> {
-
+                Log.i("Stuff", "prepareForVideoRecording")
                 // This optimization is not required for Android.
                 result.success(null)
             }
             "startVideoRecording" -> {
-                camera!!.startVideoRecording(call.argument("filePath")!!, result)
+                Log.i("Stuff", "startVideoRecording")
+                camera?.startVideoRecording(call.argument("filePath")!!, result)
             }
             "startVideoStreaming" -> {
-                Log.i("Stuff", call.arguments.toString())
+                Log.i("Stuff", "startVideoStreaming ${call.arguments.toString()}")
                 var bitrate: Int? = null
                 if (call.hasArgument("bitrate")) {
                     bitrate = call.argument("bitrate")
                 }
 
-                camera!!.startVideoStreaming(
+                camera?.startVideoStreaming(
                         call.argument("url"),
                         bitrate,
                         result)
             }
             "startVideoRecordingAndStreaming" -> {
-                Log.i("Stuff", call.arguments.toString())
+                Log.i("Stuff", "startVideoRecordingAndStreaming ${call.arguments.toString()}")
                 var bitrate: Int? = null
                 if (call.hasArgument("bitrate")) {
                     bitrate = call.argument("bitrate")
                 }
-                camera!!.startVideoRecordingAndStreaming(
+                camera?.startVideoRecordingAndStreaming(
                         call.argument("filePath")!!,
                         call.argument("url"),
                         bitrate,
                         result)
             }
             "pauseVideoStreaming" -> {
-                camera!!.pauseVideoStreaming(result)
+                Log.i("Stuff", "pauseVideoStreaming")
+                camera?.pauseVideoStreaming(result)
             }
             "resumeVideoStreaming" -> {
-                camera!!.resumeVideoStreaming(result)
+                Log.i("Stuff", "resumeVideoStreaming")
+                camera?.resumeVideoStreaming(result)
             }
             "stopRecordingOrStreaming" -> {
-                camera!!.stopVideoRecordingOrStreaming(result)
+                Log.i("Stuff", "stopRecordingOrStreaming")
+                camera?.stopVideoRecordingOrStreaming(result)
             }
             "stopRecording" -> {
-                camera!!.stopVideoRecording(result)
+                Log.i("Stuff", "stopRecording")
+                camera?.stopVideoRecording(result)
             }
             "stopStreaming" -> {
-                camera!!.stopVideoStreaming(result)
+                Log.i("Stuff", "stopStreaming")
+                camera?.stopVideoStreaming(result)
             }
             "pauseVideoRecording" -> {
-                camera!!.pauseVideoRecording(result)
+                Log.i("Stuff", "pauseVideoRecording")
+                camera?.pauseVideoRecording(result)
             }
             "resumeVideoRecording" -> {
-                camera!!.resumeVideoRecording(result)
+                Log.i("Stuff", "resumeVideoRecording")
+                camera?.resumeVideoRecording(result)
             }
             "startImageStream" -> {
+                Log.i("Stuff", "startImageStream")
                 try {
-                    camera!!.startPreviewWithImageStream(imageStreamChannel)
+                    camera?.startPreviewWithImageStream(imageStreamChannel)
                     result.success(null)
                 } catch (e: Exception) {
                     handleException(e, result)
                 }
             }
             "stopImageStream" -> {
+                Log.i("Stuff", "startImageStream")
                 try {
-                    camera!!.startPreview()
+                    camera?.startPreview()
                     result.success(null)
                 } catch (e: Exception) {
                     handleException(e, result)
                 }
             }
             "getStreamStatistics" -> {
+                Log.i("Stuff", "getStreamStatistics")
                 try {
-                    camera!!.getStreamStatistics(result)
+                    camera?.getStreamStatistics(result)
                 } catch (e: Exception) {
                     handleException(e, result)
                 }
             }
             "dispose" -> {
+                Log.i("Stuff", "dispose")
                 if (camera != null) {
-                    camera!!.dispose()
+                    camera?.dispose()
                 }
                 result.success(null)
             }
@@ -156,17 +171,27 @@ internal class MethodCallHandlerImpl(
             enableOpenGL = call.argument<Boolean>("enableAndroidOpenGL")!!
         }
         val flutterSurfaceTexture = textureRegistry.createSurfaceTexture()
-        val dartMessenger = DartMessenger(messenger, flutterSurfaceTexture.id())
+        val textureId: Long = flutterSurfaceTexture.id()
+        val dartMessenger = DartMessenger(messenger, textureId)
+//        camera = CameraWrapper(
+//                activity = activity,
+//                flutterTexture = flutterSurfaceTexture,
+//                dartMessenger = dartMessenger,
+//                cameraName = cameraName!!,
+//                resolutionPreset = resolutionPreset,
+//                streamingPreset = streamingPreset,
+//                enableAudio = enableAudio,
+//                useOpenGL = enableOpenGL)
         camera = Camera(
-                activity,
-                flutterSurfaceTexture,
-                dartMessenger,
-                cameraName!!,
-                resolutionPreset,
-                streamingPreset,
-                enableAudio,
-                enableOpenGL)
-        camera!!.open(result)
+                activity = activity,
+                flutterTexture = flutterSurfaceTexture,
+                dartMessenger = dartMessenger,
+                cameraName = cameraName!!,
+                resolutionPreset = resolutionPreset,
+                streamingPreset = streamingPreset,
+                enableAudio = enableAudio,
+                useOpenGL = enableOpenGL)
+        camera?.apply { open(result) }
     }
 
     // We move catching CameraAccessException out of onMethodCall because it causes a crash

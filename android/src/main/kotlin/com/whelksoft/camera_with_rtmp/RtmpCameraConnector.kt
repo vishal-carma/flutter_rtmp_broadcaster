@@ -29,7 +29,7 @@ import java.nio.ByteBuffer
 class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPortrait: Boolean, val connectChecker: ConnectCheckerRtmp) :
         GetAacData, GetVideoData, GetMicrophoneData, FpsListener.Callback,
         RecordController.Listener, ConnectCheckerRtmp {
-    private var videoEncoder: VideoEncoder? = null
+    private var videoEncoder: AppVideoEncoder? = null
     private var microphoneManager: MicrophoneManager
     private var audioEncoder: AudioEncoder
     private var srsFlvMuxer: SrsFlvMuxer
@@ -96,7 +96,7 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
     val inputSurface: Surface
         get() {
             if (useOpenGL) {
-                return glInterface.getSurface()
+                return glInterface.surface
             } else {
                 return videoEncoder!!.surface!!
             }
@@ -124,8 +124,19 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
                              -1, aspectRatio: Double = 1.0): Boolean {
         pausedStreaming = false
         pausedRecording = false
-        videoEncoder = VideoEncoder(
-                this, width, height, fps, bitrate, if (useOpenGL) 0 else rotation, hardwareRotation, iFrameInterval, FormatVideoEncoder.SURFACE, avcProfile, avcProfileLevel, aspectRatio)
+        videoEncoder = AppVideoEncoder(
+                this,
+                width,
+                height,
+                fps,
+                bitrate,
+                if (useOpenGL) 0 else rotation,
+                hardwareRotation,
+                iFrameInterval,
+                FormatVideoEncoder.SURFACE,
+                avcProfile,
+                avcProfileLevel,
+                aspectRatio)
 
         val result = videoEncoder!!.prepare()
         if (useOpenGL) {
@@ -146,7 +157,7 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
     private fun prepareGlInterface(rotation: Int, aspectRatio: Double) {
         Log.i(TAG, "prepareGlInterface $rotation $isPortrait")
         this.glInterface.setEncoderSize(videoEncoder!!.width, videoEncoder!!.height)
-        this.glInterface.setPreviewSize(videoEncoder!!.width, videoEncoder!!.height)
+//        this.glInterface.setPreviewSize(videoEncoder!!.width, videoEncoder!!.height)
         this.glInterface.setRotation(rotation)
         this.glInterface.start()
     }
@@ -172,10 +183,10 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
     @JvmOverloads
     fun prepareAudio(bitrate: Int = 64 * 1024, sampleRate: Int = 32000, isStereo: Boolean = true, echoCanceler: Boolean = false,
                      noiseSuppressor: Boolean = false): Boolean {
-        microphoneManager!!.createMicrophone(sampleRate, isStereo, echoCanceler, noiseSuppressor)
+        microphoneManager.createMicrophone(sampleRate, isStereo, echoCanceler, noiseSuppressor)
         prepareAudioRtp(isStereo, sampleRate)
-        return audioEncoder!!.prepareAudioEncoder(bitrate, sampleRate, isStereo,
-                microphoneManager!!.maxInputSize)
+        return audioEncoder.prepareAudioEncoder(bitrate, sampleRate, isStereo,
+                microphoneManager.maxInputSize)
     }
 
     /**
@@ -184,7 +195,7 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
      */
     fun setForce(forceVideo: Force, forceAudio: Force) {
         videoEncoder!!.force = forceVideo
-        audioEncoder!!.setForce(forceAudio)
+        audioEncoder.setForce(forceAudio)
     }
 
 
@@ -200,7 +211,7 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
      */
     fun startStream(url: String) {
         if (isStreaming) {
-            return;
+            return
         }
         isStreaming = true
         startStreamRtp(url)
@@ -208,7 +219,7 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
 
     fun startRecord(path: String) {
         if (isRecording) {
-            return;
+            return
         }
         recordController.startRecord(path, this)
         isRecording = true
@@ -247,9 +258,9 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
             stopStreamRtp()
         }
         if (!isRecording) {
-            microphoneManager!!.stop()
-            videoEncoder!!.stop()
-            audioEncoder!!.stop()
+            microphoneManager.stop()
+            videoEncoder?.stop()
+            audioEncoder.stop()
             glInterface.stop()
         }
     }
@@ -359,7 +370,7 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
         return srsFlvMuxer.shouldRetry(reason)
     }
 
-    public fun reConnect(delay: Long) {
+    fun reConnect(delay: Long) {
         srsFlvMuxer.reConnect(delay)
     }
 
@@ -367,14 +378,14 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
      * Mute microphone, can be called before, while and after stream.
      */
     fun disableAudio() {
-        microphoneManager!!.mute()
+        microphoneManager.mute()
     }
 
     /**
      * Enable a muted microphone, can be called before, while and after stream.
      */
     fun enableAudio() {
-        microphoneManager!!.unMute()
+        microphoneManager.unMute()
     }
 
     /**
@@ -383,7 +394,7 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
      * @return true if muted, false if enabled
      */
     val isAudioMuted: Boolean
-        get() = microphoneManager!!.isMuted
+        get() = microphoneManager.isMuted
 
 
     fun getBitrate(): Int {
@@ -448,7 +459,7 @@ class RtmpCameraConnector(val context: Context, val useOpenGL: Boolean, val isPo
     }
 
     override fun inputPCMData(frame: Frame) {
-        audioEncoder!!.inputPCMData(frame)
+        audioEncoder.inputPCMData(frame)
     }
 
     override fun onVideoFormat(mediaFormat: MediaFormat) {

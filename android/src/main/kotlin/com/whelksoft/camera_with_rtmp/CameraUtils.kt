@@ -20,8 +20,8 @@ import java.util.*
 /** Provides various utilities for camera.  */
 object CameraUtils {
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
-    fun computeBestPreviewSize(cameraName: String, preset: ResolutionPreset): Size {
-        var preset = preset
+    fun computeBestPreviewSize(cameraName: String, presetArg: ResolutionPreset): Size {
+        var preset = presetArg
         if (preset.ordinal > ResolutionPreset.high.ordinal) {
             preset = ResolutionPreset.high
         }

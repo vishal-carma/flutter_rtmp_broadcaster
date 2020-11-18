@@ -8,6 +8,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:camera_with_rtmp/camera.dart';
+import 'package:camera_with_rtmp_example/measured_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
@@ -47,7 +48,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   bool enableAudio = true;
   bool useOpenGL = true;
   TextEditingController _textFieldController = TextEditingController(
-      text: "rtmp://34.70.40.166:1935/LiveApp/815794454132232781694481");
+      text: "rtmp://binty-ingest.livepeer.org/live/video+1");
 
   Timer _timer;
 
@@ -97,8 +98,13 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
             child: Container(
               child: Padding(
                 padding: const EdgeInsets.all(1.0),
-                child: Center(
-                  child: _cameraPreviewWidget(),
+                child: MeasureSize(
+                  onChange: (size) {
+                    debugPrint('camera widget size $size');
+                  },
+                  child: Center(
+                    child: _cameraPreviewWidget(),
+                  ),
                 ),
               ),
               decoration: BoxDecoration(
@@ -240,7 +246,9 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
               : null,
         ),
         IconButton(
-          icon: controller != null && (controller.value.isRecordingPaused || controller.value.isStreamingPaused)
+          icon: controller != null &&
+                  (controller.value.isRecordingPaused ||
+                      controller.value.isStreamingPaused)
               ? Icon(Icons.play_arrow)
               : Icon(Icons.pause),
           color: Colors.blue,
@@ -308,7 +316,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     }
     controller = CameraController(
       cameraDescription,
-      ResolutionPreset.medium,
+      ResolutionPreset.max,
       enableAudio: enableAudio,
       androidUseOpenGL: useOpenGL,
     );
@@ -430,7 +438,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       return null;
     }
 
-    final Directory extDir = await getApplicationDocumentsDirectory();
+    final Directory extDir = await getExternalStorageDirectory();
     final String dirPath = '${extDir.path}/Movies/flutter_test';
     await Directory(dirPath).create(recursive: true);
     final String filePath = '$dirPath/${timestamp()}.mp4';
@@ -467,12 +475,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   Future<void> pauseVideoRecording() async {
     try {
-     if (controller.value.isRecordingVideo) {
-       await controller.pauseVideoRecording();
-     }
-     if (controller.value.isStreamingVideoRtmp) {
-       await controller.pauseVideoStreaming();
-     }
+      if (controller.value.isRecordingVideo) {
+        await controller.pauseVideoRecording();
+      }
+      if (controller.value.isStreamingVideoRtmp) {
+        await controller.pauseVideoStreaming();
+      }
     } on CameraException catch (e) {
       _showCameraException(e);
       rethrow;
@@ -481,12 +489,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   Future<void> resumeVideoRecording() async {
     try {
-     if (controller.value.isRecordingVideo) {
-       await controller.resumeVideoRecording();
-     }
-     if (controller.value.isStreamingVideoRtmp) {
-       await controller.resumeVideoStreaming();
-     }
+      if (controller.value.isRecordingVideo) {
+        await controller.resumeVideoRecording();
+      }
+      if (controller.value.isStreamingVideoRtmp) {
+        await controller.resumeVideoStreaming();
+      }
     } on CameraException catch (e) {
       _showCameraException(e);
       rethrow;
@@ -665,7 +673,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       showInSnackBar('Error: select a camera first.');
       return null;
     }
-    final Directory extDir = await getApplicationDocumentsDirectory();
+    final Directory extDir = await getExternalStorageDirectory();
     final String dirPath = '${extDir.path}/Pictures/flutter_test';
     await Directory(dirPath).create(recursive: true);
     final String filePath = '$dirPath/${timestamp()}.jpg';

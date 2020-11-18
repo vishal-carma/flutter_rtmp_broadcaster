@@ -175,13 +175,18 @@ class CameraPreview extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return controller.value.isInitialized
-        ? controller.value.previewSize.width < controller.value.previewSize.height ?
-        RotatedBox(
-        quarterTurns: controller.value.previewQuarterTurns,
-        child:
-        Texture(textureId: controller._textureId)) : Texture(textureId: controller._textureId)
-        : Container();
+    if (controller.value.isInitialized) {
+      if (controller.value.previewSize.width <
+          controller.value.previewSize.height) {
+        return RotatedBox(
+            quarterTurns: controller.value.previewQuarterTurns,
+            child: Texture(textureId: controller._textureId));
+      } else {
+        return Texture(textureId: controller._textureId);
+      }
+    } else {
+      return Container();
+    }
   }
 }
 
@@ -423,7 +428,8 @@ class CameraController extends ValueNotifier<CameraValue> {
         value = value.copyWith(isStreamingVideoRtmp: false);
         break;
       case 'rotation_update':
-        value = value.copyWith(previewQuarterTurns: int.parse(event['errorDescription']));
+        value = value.copyWith(
+            previewQuarterTurns: int.parse(event['errorDescription']));
         break;
     }
   }

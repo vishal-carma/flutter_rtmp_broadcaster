@@ -24,7 +24,7 @@ import java.util.List
  * Encodes the data going over the wire to the backend system, this handles talking
  * with the media encoder framework and shuttling this over to the rtmp system itself.
  */
-class VideoEncoder(
+class AppVideoEncoder(
         val getVideoData: GetVideoData,
         val width: Int,
         val height: Int,
