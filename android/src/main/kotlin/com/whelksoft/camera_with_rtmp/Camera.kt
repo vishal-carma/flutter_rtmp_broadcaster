@@ -23,7 +23,9 @@ import androidx.annotation.RequiresApi
 import com.pedro.encoder.input.video.CameraHelper
 import com.pedro.encoder.video.FormatVideoEncoder
 import com.pedro.rtplibrary.rtmp.RtmpCamera1
+import com.pedro.rtplibrary.rtmp.RtmpCamera2
 import com.pedro.rtplibrary.util.BitrateAdapter
+import com.pedro.rtplibrary.view.LightOpenGlView
 import com.pedro.rtplibrary.view.OpenGlView
 import io.flutter.plugin.common.EventChannel
 import io.flutter.plugin.common.EventChannel.EventSink
@@ -68,8 +70,8 @@ class Camera(
     private val aspectRatio: Double = 4.0 / 5.0
 
 //    private val glView: FlutterGLSurfaceView
-    private val glView: OpenGlView
-    private val rtmpCamera: RtmpCamera1
+    private val glView: LightOpenGlView
+    private val rtmpCamera: RtmpCamera2
 //    private val renderer: CameraSurfaceRenderer
 
     init {
@@ -105,7 +107,8 @@ class Camera(
         streamingProfile = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, streamPreset)
 
 //        glView = FlutterGLSurfaceView(activity, flutterTexture.surfaceTexture())
-        glView = OpenGlView(activity)
+        glView = LightOpenGlView(activity)
+        glView.isKeepAspectRatio = true
         glView.holder.addCallback(this)
 //        glView.setEGLContextClientVersion(2)
 //        renderer = CameraSurfaceRenderer()
@@ -113,7 +116,7 @@ class Camera(
 //        renderer.addOnRendererStateChangedLister(this)
 //        glView.setRenderer(renderer)
 //        glView.renderMode = GLSurfaceView.RENDERMODE_WHEN_DIRTY
-        rtmpCamera = RtmpCamera1(glView, this)
+        rtmpCamera = RtmpCamera2(glView, this)
         updateSurfaceView()
     }
 
@@ -837,9 +840,9 @@ class Camera(
 
     private fun getSizePairByOrientation(): Pair<Int, Int> {
         return if (isPortrait) {
-            Pair(previewSize.width, previewSize.height)
+            Pair((previewSize.width * aspectRatio).toInt(), previewSize.height)
         } else {
-            Pair(previewSize.height, previewSize.width)
+            Pair(previewSize.height, (previewSize.width * aspectRatio).toInt())
         }
     }
 
@@ -868,11 +871,16 @@ class Camera(
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
+        val surfaceTexture = flutterTexture.surfaceTexture()
+        val size = getSizePairByOrientation()
+        surfaceTexture.setDefaultBufferSize(size.first, size.second)
+        val flutterSurface = Surface(surfaceTexture)
     }
 
     override fun surfaceDestroyed(holder: SurfaceHolder?) {
     }
 
     override fun surfaceCreated(holder: SurfaceHolder?) {
+
     }
 }
