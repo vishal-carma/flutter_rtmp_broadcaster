@@ -3,6 +3,7 @@
 // found in the LICENSE file.
 
 import 'dart:async';
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
@@ -176,13 +177,29 @@ class CameraPreview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (controller.value.isInitialized) {
+      Widget childView;
+      if (Platform.isAndroid) {
+        final String viewType = 'hybrid-view-type';
+        // Pass parameters to the platform side.
+        final Map<String, dynamic> creationParams = <String, dynamic>{};
+
+        childView = AndroidView(
+          viewType: viewType,
+          layoutDirection: TextDirection.ltr,
+          creationParams: creationParams,
+          creationParamsCodec: const StandardMessageCodec(),
+        );
+      } else {
+        childView = Texture(textureId: controller._textureId);
+      }
+
       if (controller.value.previewSize.width <
           controller.value.previewSize.height) {
         return RotatedBox(
             quarterTurns: controller.value.previewQuarterTurns,
-            child: Texture(textureId: controller._textureId));
+            child: childView);
       } else {
-        return Texture(textureId: controller._textureId);
+        return childView;
       }
     } else {
       return Container();

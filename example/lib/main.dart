@@ -8,7 +8,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:camera_with_rtmp/camera.dart';
-import 'package:camera_with_rtmp_example/measured_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:video_player/video_player.dart';
@@ -98,13 +97,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
             child: Container(
               child: Padding(
                 padding: const EdgeInsets.all(1.0),
-                child: MeasureSize(
-                  onChange: (size) {
-                    debugPrint('camera widget size $size');
-                  },
-                  child: Center(
-                    child: _cameraPreviewWidget(),
-                  ),
+                child: Center(
+                  child: _cameraPreviewWidget(),
                 ),
               ),
               decoration: BoxDecoration(
@@ -142,6 +136,22 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   /// Display the preview from the camera (or a message if the preview is not available).
   Widget _cameraPreviewWidget() {
+    // if (controller == null || !controller.value.isInitialized) {
+    //   return const Text(
+    //     'Tap a camera',
+    //     style: TextStyle(
+    //       color: Colors.white,
+    //       fontSize: 24.0,
+    //       fontWeight: FontWeight.w900,
+    //     ),
+    //   );
+    // } else {
+    //   return AspectRatio(
+    //     aspectRatio: controller.value.aspectRatio,
+    //     child: CameraPreview(controller),
+    //   );
+    // }
+
     if (controller == null || !controller.value.isInitialized) {
       return const Text(
         'Tap a camera',
@@ -152,10 +162,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         ),
       );
     } else {
-      return AspectRatio(
-        aspectRatio: controller.value.aspectRatio,
-        child: CameraPreview(controller),
-      );
+      return CameraPreview(controller);
     }
   }
 

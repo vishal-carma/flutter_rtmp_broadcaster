@@ -9,9 +9,9 @@ import androidx.core.content.ContextCompat
 import io.flutter.plugin.common.PluginRegistry.RequestPermissionsResultListener
 import kotlin.reflect.KFunction1
 
-internal class CameraPermissions {
+class CameraPermissions {
 
-    internal interface ResultCallback {
+    interface ResultCallback {
         fun onResult(errorCode: String?, errorDescription: String?)
     }
 
@@ -24,7 +24,7 @@ internal class CameraPermissions {
         if (ongoing) {
             callback.onResult("cameraPermission", "Camera permission request ongoing")
         }
-        if (!hasCameraPermission(activity) || enableAudio && !hasAudioPermission(activity) || !hasWriteExternalStoragePermission(activity)) {
+        if (!hasCameraPermission(activity) || enableAudio && !hasAudioPermission(activity) || !hasWriteExternalStoragePermission(activity) || !hasWakeLockPermission(activity)) {
             permissionsRegistry.adddListener(
                     CameraRequestPermissionsListener(
                             object : ResultCallback {
@@ -36,7 +36,7 @@ internal class CameraPermissions {
             ongoing = true
             ActivityCompat.requestPermissions(
                     activity,
-                    if (enableAudio) arrayOf(permission.CAMERA, permission.RECORD_AUDIO, permission.WRITE_EXTERNAL_STORAGE) else arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE),
+                    if (enableAudio) arrayOf(permission.CAMERA, permission.RECORD_AUDIO, permission.WRITE_EXTERNAL_STORAGE, permission.WAKE_LOCK) else arrayOf(permission.CAMERA, permission.WRITE_EXTERNAL_STORAGE, permission.WAKE_LOCK),
                     CAMERA_REQUEST_ID)
         } else {
             // Permissions already exist. Call the callback with success.
@@ -56,6 +56,11 @@ internal class CameraPermissions {
 
     private fun hasWriteExternalStoragePermission(activity: Activity): Boolean {
         return (ContextCompat.checkSelfPermission(activity, permission.WRITE_EXTERNAL_STORAGE)
+                == PackageManager.PERMISSION_GRANTED)
+    }
+
+    private fun hasWakeLockPermission(activity: Activity): Boolean {
+        return (ContextCompat.checkSelfPermission(activity, permission.WAKE_LOCK)
                 == PackageManager.PERMISSION_GRANTED)
     }
 

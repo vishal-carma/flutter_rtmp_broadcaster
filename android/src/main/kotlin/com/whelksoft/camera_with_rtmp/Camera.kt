@@ -47,7 +47,7 @@ class Camera(
         val resolutionPreset: String?,
         val streamingPreset: String?,
         val enableAudio: Boolean,
-        val useOpenGL: Boolean) : ConnectCheckerRtmp, CameraSurfaceRenderer.OnRendererStateChangedListener, SurfaceTexture.OnFrameAvailableListener, SurfaceHolder.Callback {
+        val useOpenGL: Boolean) : ConnectCheckerRtmp, SurfaceTexture.OnFrameAvailableListener, SurfaceHolder.Callback {
     private val cameraManager: CameraManager
     private val orientationEventListener: OrientationEventListener
     private val isFrontFacing: Boolean
@@ -72,7 +72,6 @@ class Camera(
 //    private val glView: FlutterGLSurfaceView
     private val glView: LightOpenGlView
     private val rtmpCamera: RtmpCamera2
-//    private val renderer: CameraSurfaceRenderer
 
     init {
         checkNotNull(activity) { "No activity available!" }
@@ -817,22 +816,6 @@ class Camera(
     }
 
     private var glSurfaceTexture: SurfaceTexture? = null
-
-    override fun onSurfaceCreated(surfaceTextureArg: SurfaceTexture?) {
-//        onActivityResume()
-        surfaceTextureArg?.apply {
-            val size = getSizePairByOrientation()
-            setDefaultBufferSize(size.second, size.first)
-            setOnFrameAvailableListener(this@Camera)
-        }
-        glSurfaceTexture = surfaceTextureArg
-//        startPreview()
-//        camera.startPreview(surfaceTexture)
-    }
-
-    override fun onFrameDrawn(textureId: Int, transform: FloatArray?, timestamp: Long) {
-        // no-op
-    }
 
     override fun onFrameAvailable(surfaceTexture: SurfaceTexture?) {
 //        glView.requestRender()
