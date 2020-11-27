@@ -23,11 +23,14 @@ import java.io.*
 
 
 class CameraNativeView(
-        private val activity: Activity,
+        private var activity: Activity? = null,
         private var enableAudio: Boolean = false,
         private val preset: Camera.ResolutionPreset,
         private var cameraName: String,
-        private var dartMessenger: DartMessenger? = null) : PlatformView, SurfaceHolder.Callback, ConnectCheckerRtmp {
+        private var dartMessenger: DartMessenger? = null) :
+        PlatformView,
+        SurfaceHolder.Callback,
+        ConnectCheckerRtmp {
 
     private val glView = LightOpenGlView(activity)
     private val rtmpCamera: RtmpCamera2
@@ -59,21 +62,26 @@ class CameraNativeView(
     }
 
     override fun onConnectionFailedRtmp(reason: String) {
-        activity.runOnUiThread { //Wait 5s and retry connect stream
+        activity?.runOnUiThread { //Wait 5s and retry connect stream
             if (rtmpCamera.reTry(5000, reason)) {
-//                dartMessenger.send(DartMessenger.EventType.RTMP_RETRY, reason)
-                Toast.makeText(view.context, "Retry", Toast.LENGTH_SHORT).show()
+                dartMessenger?.send(DartMessenger.EventType.RTMP_RETRY, reason)
             } else {
-                Toast.makeText(view.context, "Connection failed. $reason", Toast.LENGTH_SHORT).show()
+                dartMessenger?.send(DartMessenger.EventType.RTMP_STOPPED, "Failed retry")
                 rtmpCamera.stopStream()
             }
         }
     }
 
     override fun onAuthErrorRtmp() {
+        activity?.runOnUiThread {
+            dartMessenger?.send(DartMessenger.EventType.ERROR, "Auth error")
+        }
     }
 
     override fun onDisconnectRtmp() {
+        activity?.runOnUiThread {
+            dartMessenger?.send(DartMessenger.EventType.RTMP_STOPPED, "Disconnected")
+        }
     }
 
     override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
@@ -128,9 +136,14 @@ class CameraNativeView(
                 if (enableAudio) {
                     rtmpCamera.prepareAudio()
                 }
-                if (rtmpCamera.isRecording && rtmpCamera.prepareVideo(streamingSize.videoFrameWidth, streamingSize.videoFrameHeight, streamingSize.videoBitRate)) {
+                if (rtmpCamera.isRecording && rtmpCamera.prepareVideo(
+                                streamingSize.videoFrameWidth,
+                                streamingSize.videoFrameHeight,
+                                streamingSize.videoBitRate)) {
                     // ready to start streaming
-                    Log.d("CameraNativeView", "startVideoStreaming url: $url size: [${streamingSize.videoFrameWidth}:${streamingSize.videoFrameHeight}] bitrate: ${streamingSize.videoBitRate}")
+                    Log.d("CameraNativeView", "startVideoStreaming url: $url " +
+                            "size: [${streamingSize.videoFrameWidth}:${streamingSize.videoFrameHeight}] " +
+                            "bitrate: ${streamingSize.videoBitRate}")
                     rtmpCamera.startStream(url)
                 } else {
                     result.error("videoStreamingFailed", "Error preparing stream, This device cant do it", null)
@@ -230,7 +243,8 @@ class CameraNativeView(
 
                 rtmpCamera.startPreview(if (isFrontFacing(targetCamera)) FRONT else BACK, previewSize.width, previewSize.height)
             } catch (e: CameraAccessException) {
-                close()
+//                close()
+                activity?.runOnUiThread { dartMessenger?.send(DartMessenger.EventType.ERROR, "CameraAccessException") }
                 return
             }
         }
@@ -257,23 +271,12 @@ class CameraNativeView(
 
     override fun dispose() {
         isSurfaceCreated = false
+        activity = null
     }
 
     private fun isFrontFacing(cameraName: String): Boolean {
-        val cameraManager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val cameraManager = activity?.getSystemService(Context.CAMERA_SERVICE) as CameraManager
         val characteristics = cameraManager.getCameraCharacteristics(cameraName)
         return characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT
     }
-
-    private val isPortrait: Boolean
-        get() {
-            val getOrient = activity.windowManager.defaultDisplay
-            val pt = Point()
-            getOrient.getSize(pt)
-
-            return when (pt.x) {
-                pt.y -> true
-                else -> pt.x < pt.y
-            }
-        }
 }

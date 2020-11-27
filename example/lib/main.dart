@@ -47,7 +47,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   bool enableAudio = true;
   bool useOpenGL = true;
   TextEditingController _textFieldController = TextEditingController(
-      text: "rtmp://binty-ingest.livepeer.org/live/video+1");
+      text: "rtmp://34.70.40.166:1935/LiveApp/815794454132232781694481");
 
   Timer _timer;
 
@@ -136,22 +136,6 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   /// Display the preview from the camera (or a message if the preview is not available).
   Widget _cameraPreviewWidget() {
-    // if (controller == null || !controller.value.isInitialized) {
-    //   return const Text(
-    //     'Tap a camera',
-    //     style: TextStyle(
-    //       color: Colors.white,
-    //       fontSize: 24.0,
-    //       fontWeight: FontWeight.w900,
-    //     ),
-    //   );
-    // } else {
-    //   return AspectRatio(
-    //     aspectRatio: controller.value.aspectRatio,
-    //     child: CameraPreview(controller),
-    //   );
-    // }
-
     if (controller == null || !controller.value.isInitialized) {
       return const Text(
         'Tap a camera',
@@ -162,7 +146,10 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         ),
       );
     } else {
-      return CameraPreview(controller);
+      return AspectRatio(
+        aspectRatio: controller.value.aspectRatio,
+        child: CameraPreview(controller),
+      );
     }
   }
 

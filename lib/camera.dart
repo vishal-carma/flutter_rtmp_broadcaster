@@ -179,14 +179,8 @@ class CameraPreview extends StatelessWidget {
     if (controller.value.isInitialized) {
       Widget childView;
       if (Platform.isAndroid) {
-        final String viewType = 'hybrid-view-type';
-        // Pass parameters to the platform side.
-        final Map<String, dynamic> creationParams = <String, dynamic>{};
-
         childView = AndroidView(
-          viewType: viewType,
-          layoutDirection: TextDirection.ltr,
-          creationParams: creationParams,
+          viewType: 'hybrid-view-type',
           creationParamsCodec: const StandardMessageCodec(),
         );
       } else {
