@@ -15,7 +15,6 @@ import androidx.annotation.RequiresApi
 import com.whelksoft.camera_with_rtmp.CameraPermissions.ResultCallback
 import io.flutter.plugin.common.*
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
-import io.flutter.view.TextureRegistry
 import io.flutter.embedding.engine.FlutterEngine
 import java.util.HashMap
 
@@ -28,13 +27,10 @@ class MethodCallHandlerImplNew(
 
     private val methodChannel: MethodChannel
     private val imageStreamChannel: EventChannel
-//    private var cameraView: CameraNativeView? = null
-
-    private val orientationEventListener: OrientationEventListener
     private var currentOrientation = OrientationEventListener.ORIENTATION_UNKNOWN
     private var dartMessenger: DartMessenger? = null
     private var nativeViewFactory: NativeViewFactory? = null
-    private val  handler = Handler()
+    private val handler = Handler()
 
     private val textureId = 0L
 
@@ -49,19 +45,6 @@ class MethodCallHandlerImplNew(
                 .platformViewsController
                 .registry
                 .registerViewFactory("hybrid-view-type", nativeViewFactory)
-
-        orientationEventListener = object : OrientationEventListener(activity.applicationContext) {
-            override fun onOrientationChanged(i: Int) {
-                if (i == ORIENTATION_UNKNOWN) {
-                    return
-                }
-                // Convert the raw deg angle to the nearest multiple of 90.
-                currentOrientation = Math.round(i / 90.0).toInt() * 90
-                // Send a message with the new orientation to the ux.
-                dartMessenger?.send(DartMessenger.EventType.ROTATION_UPDATE, (currentOrientation / 90).toString())
-                Log.i("TAG", "Updated Orientation (sent) " + currentOrientation + " -- " + (currentOrientation / 90).toString())
-            }
-        }
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -75,7 +58,6 @@ class MethodCallHandlerImplNew(
             }
             "initialize" -> {
                 Log.i("Stuff", "initialize")
-//                getCameraView()?.close()
                 cameraPermissions.requestPermissions(
                         activity,
                         permissionsRegistry,
@@ -97,7 +79,6 @@ class MethodCallHandlerImplNew(
             "takePicture" -> {
                 Log.i("Stuff", "takePicture")
                 getCameraView()?.takePicture(call.argument("path")!!, result)
-                result.success(null)
             }
             "prepareForVideoRecording" -> {
                 Log.i("Stuff", "prepareForVideoRecording")
@@ -109,26 +90,17 @@ class MethodCallHandlerImplNew(
                 getCameraView()?.startVideoRecording(call.argument("filePath")!!, result)
             }
             "startVideoStreaming" -> {
-                Log.i("Stuff", "startVideoStreaming ${call.arguments.toString()}")
+                Log.i("Stuff", "startVideoStreaming ${call.arguments}")
                 var bitrate: Int? = null
-                if (call.hasArgument("bitrate")) {
-                    bitrate = call.argument("bitrate")
-                }
                 getCameraView()?.startVideoStreaming(
                         call.argument("url"),
-                        bitrate,
                         result)
             }
             "startVideoRecordingAndStreaming" -> {
-                Log.i("Stuff", "startVideoRecordingAndStreaming ${call.arguments.toString()}")
-                var bitrate: Int? = null
-                if (call.hasArgument("bitrate")) {
-                    bitrate = call.argument("bitrate")
-                }
+                Log.i("Stuff", "startVideoRecordingAndStreaming ${call.arguments}")
                 getCameraView()?.startVideoRecordingAndStreaming(
                         call.argument("filePath"),
                         call.argument("url"),
-                        bitrate,
                         result)
             }
             "pauseVideoStreaming" -> {
@@ -171,7 +143,7 @@ class MethodCallHandlerImplNew(
             "stopImageStream" -> {
                 Log.i("Stuff", "startImageStream")
                 try {
-                    getCameraView()?.startPreview(true)
+                    getCameraView()?.startPreview()
                     result.success(null)
                 } catch (e: Exception) {
                     handleException(e, result)
@@ -188,8 +160,6 @@ class MethodCallHandlerImplNew(
             "dispose" -> {
                 Log.i("Stuff", "dispose")
                 // Native camera view handles the view lifecircle by themselves
-//                getCameraView()?.dispose()
-                orientationEventListener.disable()
                 result.success(null)
             }
             else -> result.notImplemented()
@@ -205,33 +175,25 @@ class MethodCallHandlerImplNew(
     private fun instantiateCamera(call: MethodCall, result: MethodChannel.Result) {
         handler.postDelayed({
             val cameraName = call.argument<String>("cameraName") ?: "0"
-            val resolutionPreset = call.argument<String>("resolutionPreset") ?: "low"
-            val streamingPreset = call.argument<String>("streamingPreset")
+            val resolutionPreset = call.argument<String>("resolutionPreset")
+                    ?: "low"
             val enableAudio = call.argument<Boolean>("enableAudio")!!
-            var enableOpenGL = true
-            if (call.hasArgument("enableAndroidOpenGL")) {
-                enableOpenGL = call.argument<Boolean>("enableAndroidOpenGL")!!
-            }
             dartMessenger = DartMessenger(messenger, textureId)
 
             val preset = Camera.ResolutionPreset.valueOf(resolutionPreset)
             val previewSize = CameraUtils.computeBestPreviewSize(cameraName, preset)
             val reply: MutableMap<String, Any> = HashMap()
             reply["textureId"] = textureId
-
-            if (isPortrait) {
-                reply["previewWidth"] = previewSize.width
-                reply["previewHeight"] = previewSize.height
-            } else {
-                reply["previewWidth"] = previewSize.height
-                reply["previewHeight"] = previewSize.width
-            }
+            reply["previewWidth"] = previewSize.width
+            reply["previewHeight"] = previewSize.height
             reply["previewQuarterTurns"] = currentOrientation / 90
-            orientationEventListener.enable()
             Log.i("TAG", "open: width: " + reply["previewWidth"] + " height: " + reply["previewHeight"] + " currentOrientation: " + currentOrientation + " quarterTurns: " + reply["previewQuarterTurns"])
             // TODO Refactor cameraView initialisation
-            nativeViewFactory?.isFrontFacingOnStart = isFrontFacing(cameraName)
-            getCameraView()?.startPreview(isFrontFacing(cameraName))
+            nativeViewFactory?.cameraName = cameraName
+            nativeViewFactory?.preset = preset
+            nativeViewFactory?.enableAudio = enableAudio
+            nativeViewFactory?.dartMessenger = dartMessenger
+            getCameraView()?.startPreview(cameraName)
             result.success(reply)
         }, 100)
     }
@@ -241,18 +203,6 @@ class MethodCallHandlerImplNew(
         val characteristics = cameraManager.getCameraCharacteristics(cameraName)
         return characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT
     }
-
-    private val isPortrait: Boolean
-        get() {
-            val getOrient = activity.windowManager.defaultDisplay
-            val pt = Point()
-            getOrient.getSize(pt)
-
-            return when (pt.x) {
-                pt.y -> true
-                else -> pt.x < pt.y
-            }
-        }
 
     // We move catching CameraAccessException out of onMethodCall because it causes a crash
     // on plugin registration for sdks incompatible with Camera2 (< 21). We want this plugin to
@@ -265,5 +215,5 @@ class MethodCallHandlerImplNew(
         throw (exception as RuntimeException)
     }
 
-    fun getCameraView(): CameraNativeView? = nativeViewFactory?.cameraNativeView
+    private fun getCameraView(): CameraNativeView? = nativeViewFactory?.cameraNativeView
 }

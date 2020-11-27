@@ -49,7 +49,7 @@ class Camera(
         val enableAudio: Boolean,
         val useOpenGL: Boolean) : ConnectCheckerRtmp, SurfaceTexture.OnFrameAvailableListener, SurfaceHolder.Callback {
     private val cameraManager: CameraManager
-    private val orientationEventListener: OrientationEventListener
+//    private val orientationEventListener: OrientationEventListener
     private val isFrontFacing: Boolean
     private val sensorOrientation: Int
     private val captureSize: Size
@@ -76,21 +76,21 @@ class Camera(
     init {
         checkNotNull(activity) { "No activity available!" }
         cameraManager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
-        orientationEventListener = object : OrientationEventListener(activity.applicationContext) {
-            override fun onOrientationChanged(i: Int) {
-                if (i == ORIENTATION_UNKNOWN) {
-                    return
-                }
-                // Convert the raw deg angle to the nearest multiple of 90.
-                currentOrientation = Math.round(i / 90.0).toInt() * 90
-                // Send a message with the new orientation to the ux.
-                dartMessenger.send(DartMessenger.EventType.ROTATION_UPDATE, (currentOrientation / 90).toString())
-
-                Log.i(TAG, "Updated Orientation (sent) " + currentOrientation + " -- " + (currentOrientation / 90).toString())
-                updateSurfaceView()
-            }
-        }
-        orientationEventListener.enable()
+//        orientationEventListener = object : OrientationEventListener(activity.applicationContext) {
+//            override fun onOrientationChanged(i: Int) {
+//                if (i == ORIENTATION_UNKNOWN) {
+//                    return
+//                }
+//                // Convert the raw deg angle to the nearest multiple of 90.
+//                currentOrientation = Math.round(i / 90.0).toInt() * 90
+//                // Send a message with the new orientation to the ux.
+//                dartMessenger.send(DartMessenger.EventType.ROTATION_UPDATE, (currentOrientation / 90).toString())
+//
+//                Log.i(TAG, "Updated Orientation (sent) " + currentOrientation + " -- " + (currentOrientation / 90).toString())
+//                updateSurfaceView()
+//            }
+//        }
+//        orientationEventListener.enable()
         val characteristics = cameraManager.getCameraCharacteristics(cameraName)
         isFrontFacing = characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT
         sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)
@@ -614,7 +614,7 @@ class Camera(
     fun dispose() {
         close()
         flutterTexture.release()
-        orientationEventListener.disable()
+//        orientationEventListener.disable()
     }
 
     fun startVideoStreaming(url: String?, bitrate: Int?, result: MethodChannel.Result) {

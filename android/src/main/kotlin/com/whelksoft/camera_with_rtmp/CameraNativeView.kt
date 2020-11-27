@@ -1,8 +1,13 @@
 package com.whelksoft.camera_with_rtmp
 
 import android.app.Activity
+import android.content.Context
 import android.graphics.Bitmap
+import android.graphics.Point
 import android.hardware.camera2.CameraAccessException
+import android.hardware.camera2.CameraCharacteristics
+import android.hardware.camera2.CameraManager
+import android.hardware.camera2.CameraMetadata
 import android.util.Log
 import android.view.SurfaceHolder
 import android.view.View
@@ -10,29 +15,25 @@ import android.widget.Toast
 import com.pedro.encoder.input.video.CameraHelper.Facing.BACK
 import com.pedro.encoder.input.video.CameraHelper.Facing.FRONT
 import com.pedro.rtplibrary.rtmp.RtmpCamera2
-import com.pedro.rtplibrary.view.OpenGlView
+import com.pedro.rtplibrary.view.LightOpenGlView
 import io.flutter.plugin.common.MethodChannel
-import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.platform.PlatformView
 import net.ossrs.rtmp.ConnectCheckerRtmp
 import java.io.*
-import java.nio.ByteBuffer
 
 
 class CameraNativeView(
         private val activity: Activity,
-        id: Int,
-        var isFrontFacingOnStart: Boolean,
-        creationParams: Map<String?, Any?>?) : PlatformView, SurfaceHolder.Callback, ConnectCheckerRtmp {
+        private var enableAudio: Boolean = false,
+        private val preset: Camera.ResolutionPreset,
+        private var cameraName: String,
+        private var dartMessenger: DartMessenger? = null) : PlatformView, SurfaceHolder.Callback, ConnectCheckerRtmp {
 
-    private val glView: OpenGlView = OpenGlView(activity)
+    private val glView = LightOpenGlView(activity)
     private val rtmpCamera: RtmpCamera2
 
     private var isSurfaceCreated = false
     private var fps = 0
-
-    private val videoWidth = 600
-    private val videoHeight = 480
 
     init {
         glView.isKeepAspectRatio = true
@@ -42,10 +43,10 @@ class CameraNativeView(
         rtmpCamera.setFpsListener { fps = it }
     }
 
-    override fun surfaceCreated(holder: SurfaceHolder?) {
+    override fun surfaceCreated(holder: SurfaceHolder) {
         Log.d("CameraNativeView", "surfaceCreated")
         isSurfaceCreated = true
-        startPreview(isFrontFacingOnStart)
+        startPreview(cameraName)
     }
 
     override fun onAuthSuccessRtmp() {
@@ -61,9 +62,9 @@ class CameraNativeView(
         activity.runOnUiThread { //Wait 5s and retry connect stream
             if (rtmpCamera.reTry(5000, reason)) {
 //                dartMessenger.send(DartMessenger.EventType.RTMP_RETRY, reason)
-                Toast.makeText(getView().context, "Retry", Toast.LENGTH_SHORT).show()
+                Toast.makeText(view.context, "Retry", Toast.LENGTH_SHORT).show()
             } else {
-                Toast.makeText(getView().context, "Connection failed. $reason", Toast.LENGTH_SHORT).show()
+                Toast.makeText(view.context, "Connection failed. $reason", Toast.LENGTH_SHORT).show()
                 rtmpCamera.stopStream()
             }
         }
@@ -99,7 +100,7 @@ class CameraNativeView(
                 val outputStream: OutputStream = BufferedOutputStream(FileOutputStream(file))
                 it.compress(Bitmap.CompressFormat.JPEG, 100, outputStream)
                 outputStream.close()
-                result.success(null)
+                view.post { result.success(null) }
             } catch (e: IOException) {
                 result.error("IOError", "Failed saving image", null)
             }
@@ -115,17 +116,21 @@ class CameraNativeView(
         Log.d("CameraNativeView", "startVideoRecording filePath: $filePath result: $result")
     }
 
-    fun startVideoStreaming(url: String?, bitrate: Int?, result: MethodChannel.Result) {
-        Log.d("CameraNativeView", "startVideoStreaming url: $url bitrate: $bitrate result: ${result != null}")
+    fun startVideoStreaming(url: String?, result: MethodChannel.Result) {
+        Log.d("CameraNativeView", "startVideoStreaming url: $url")
         if (url == null) {
             result.error("startVideoStreaming", "Must specify a url.", null)
             return
         }
         try {
             if (!rtmpCamera.isStreaming) {
-                if (rtmpCamera.isRecording || rtmpCamera.prepareAudio() && rtmpCamera.prepareVideo(videoWidth, videoHeight, bitrate
-                                ?: 1200 * 1024)) {
+                val streamingSize = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, preset)
+                if (enableAudio) {
+                    rtmpCamera.prepareAudio()
+                }
+                if (rtmpCamera.isRecording && rtmpCamera.prepareVideo(streamingSize.videoFrameWidth, streamingSize.videoFrameHeight, streamingSize.videoBitRate)) {
                     // ready to start streaming
+                    Log.d("CameraNativeView", "startVideoStreaming url: $url size: [${streamingSize.videoFrameWidth}:${streamingSize.videoFrameHeight}] bitrate: ${streamingSize.videoBitRate}")
                     rtmpCamera.startStream(url)
                 } else {
                     result.error("videoStreamingFailed", "Error preparing stream, This device cant do it", null)
@@ -141,10 +146,10 @@ class CameraNativeView(
         }
     }
 
-    fun startVideoRecordingAndStreaming(filePath: String?, url: String?, bitrate: Int?, result: MethodChannel.Result) {
-        Log.d("CameraNativeView", "startVideoStreaming url: $url bitrate: $bitrate result: ${result != null}")
+    fun startVideoRecordingAndStreaming(filePath: String?, url: String?, result: MethodChannel.Result) {
+        Log.d("CameraNativeView", "startVideoStreaming url: $url")
         // TODO: Implement video recording
-        startVideoStreaming(url, bitrate ?: 1200 * 1024, result)
+        startVideoStreaming(url, result)
     }
 
     fun pauseVideoStreaming(result: Any) {
@@ -207,14 +212,23 @@ class CameraNativeView(
         // TODO: Implement start preview with image stream
     }
 
-    fun startPreview(isFrontFacing: Boolean) {
-        Log.d("CameraNativeView", "startPreview")
+    fun startPreview(cameraNameArg: String? = null) {
+        val targetCamera = if (cameraNameArg.isNullOrEmpty()) {
+            cameraName
+        } else {
+            cameraNameArg
+        }
+        cameraName = targetCamera
+        val previewSize = CameraUtils.computeBestPreviewSize(cameraName, preset)
+
+        Log.d("CameraNativeView", "startPreview: $preset")
         if (isSurfaceCreated) {
             try {
                 if (rtmpCamera.isOnPreview) {
                     rtmpCamera.stopPreview()
                 }
-                rtmpCamera.startPreview(if (isFrontFacing) FRONT else BACK, videoWidth, videoHeight)
+
+                rtmpCamera.startPreview(if (isFrontFacing(targetCamera)) FRONT else BACK, previewSize.width, previewSize.height)
             } catch (e: CameraAccessException) {
                 close()
                 return
@@ -237,15 +251,6 @@ class CameraNativeView(
         result.success(ret)
     }
 
-    @Throws(IOException::class)
-    private fun writeToFile(buffer: ByteBuffer, file: File) {
-        FileOutputStream(file).use { outputStream ->
-            while (0 < buffer.remaining()) {
-                outputStream.channel.write(buffer)
-            }
-        }
-    }
-
     override fun getView(): View {
         return glView
     }
@@ -253,4 +258,22 @@ class CameraNativeView(
     override fun dispose() {
         isSurfaceCreated = false
     }
+
+    private fun isFrontFacing(cameraName: String): Boolean {
+        val cameraManager = activity.getSystemService(Context.CAMERA_SERVICE) as CameraManager
+        val characteristics = cameraManager.getCameraCharacteristics(cameraName)
+        return characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT
+    }
+
+    private val isPortrait: Boolean
+        get() {
+            val getOrient = activity.windowManager.defaultDisplay
+            val pt = Point()
+            getOrient.getSize(pt)
+
+            return when (pt.x) {
+                pt.y -> true
+                else -> pt.x < pt.y
+            }
+        }
 }

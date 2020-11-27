@@ -323,7 +323,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     }
     controller = CameraController(
       cameraDescription,
-      ResolutionPreset.max,
+      ResolutionPreset.medium,
       enableAudio: enableAudio,
       androidUseOpenGL: useOpenGL,
     );

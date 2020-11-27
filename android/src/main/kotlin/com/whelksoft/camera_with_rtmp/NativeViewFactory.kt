@@ -3,7 +3,7 @@ package com.whelksoft.camera_with_rtmp
 import android.app.Activity
 import android.content.Context
 import android.util.Log
-import android.view.View
+import android.util.Size
 import io.flutter.plugin.common.BinaryMessenger
 import io.flutter.plugin.common.StandardMessageCodec
 import io.flutter.plugin.platform.PlatformView
@@ -11,17 +11,15 @@ import io.flutter.plugin.platform.PlatformViewFactory
 
 internal class NativeViewFactory(private val activity: Activity) : PlatformViewFactory(StandardMessageCodec.INSTANCE) {
 
-    init {
-    }
-
     var cameraNativeView: CameraNativeView? = null
-    var isFrontFacingOnStart: Boolean = true
+    var cameraName: String = "0"
+    var preset: Camera.ResolutionPreset = Camera.ResolutionPreset.low
+    var enableAudio: Boolean = false
+    var dartMessenger: DartMessenger? = null
 
     override fun create(context: Context, id: Int, args: Any?): PlatformView {
-        val creationParams = args as Map<String?, Any?>?
-        cameraNativeView = CameraNativeView(activity, id, isFrontFacingOnStart, creationParams)
+        cameraNativeView = CameraNativeView(activity, enableAudio, preset, cameraName, dartMessenger)
         Log.d("TAG", "NativeViewFactory create $cameraNativeView")
         return cameraNativeView!!
     }
-
 }
