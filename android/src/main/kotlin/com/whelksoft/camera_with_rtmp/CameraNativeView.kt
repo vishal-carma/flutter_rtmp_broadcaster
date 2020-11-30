@@ -130,23 +130,19 @@ class CameraNativeView(
             result.error("startVideoStreaming", "Must specify a url.", null)
             return
         }
+
         try {
             if (!rtmpCamera.isStreaming) {
                 val streamingSize = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, preset)
-                if (enableAudio) {
-                    rtmpCamera.prepareAudio()
-                }
-                if (rtmpCamera.isRecording && rtmpCamera.prepareVideo(
+                if (rtmpCamera.isRecording || rtmpCamera.prepareAudio() && rtmpCamera.prepareVideo(
                                 streamingSize.videoFrameWidth,
                                 streamingSize.videoFrameHeight,
                                 streamingSize.videoBitRate)) {
                     // ready to start streaming
-                    Log.d("CameraNativeView", "startVideoStreaming url: $url " +
-                            "size: [${streamingSize.videoFrameWidth}:${streamingSize.videoFrameHeight}] " +
-                            "bitrate: ${streamingSize.videoBitRate}")
                     rtmpCamera.startStream(url)
                 } else {
                     result.error("videoStreamingFailed", "Error preparing stream, This device cant do it", null)
+                    return
                 }
             } else {
                 rtmpCamera.stopStream()

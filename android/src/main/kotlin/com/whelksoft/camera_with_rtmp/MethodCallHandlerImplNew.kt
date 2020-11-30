@@ -91,7 +91,6 @@ class MethodCallHandlerImplNew(
             }
             "startVideoStreaming" -> {
                 Log.i("Stuff", "startVideoStreaming ${call.arguments}")
-                var bitrate: Int? = null
                 getCameraView()?.startVideoStreaming(
                         call.argument("url"),
                         result)
