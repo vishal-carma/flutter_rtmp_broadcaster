@@ -118,3 +118,89 @@ class _CameraAppState extends State<CameraApp> {
 
 A more complete example of doing rtmp streaming is in the
 [example code](https://github.com/pinkfish/flutter_rtmppublisher/tree/master/example)
+
+
+-----
+# Install RTMP Server on Ubuntu 18.04
+
+https://sites.google.com/view/facebook-rtmp-to-rtmps/home
+https://www.scaleway.com/en/docs/setup-rtmp-streaming-server/
+https://topdev.vn/blog/streaming-media-voi-nginx-va-nginx-rtmp-module/
+
+- RTMP publisher: https://obsproject.com/
+- RTMP client player: https://www.videolan.org/vlc/index.html
+- RTMP server: 
+```
+sudo apt update
+sudo apt install build-essential libpcre3 libpcre3-dev libssl-dev nginx libnginx-mod-rtmp ffmpeg -y
+
+sudo nano /etc/nginx/nginx.conf
+
+rtmp {
+	server {
+		listen 1935;
+		chunk_size 4096;
+		notify_method get;
+
+		application live {
+			live on;
+
+			##Set this to "record off" if you don't want to save a copy of your broadcasts
+
+			record off;
+			#record all;
+
+			## The directory in which the recordings will be stored
+			## mkdir -p /var/www/html/recordings
+			## chown -R www-data:www-data /var/www/html/recordings/
+
+			#record_path /var/www/html/recordings;
+			#record_unique on;
+
+			on_publish http://127.0.0.1/auth;
+			#on_publish http://127.0.0.1/public;
+		}
+	}
+}
+
+sudo nano /etc/nginx/sites-enabled/default
+
+
+	location /auth {
+		if ($arg_pwd = 'a_secret_password') {
+			return 200;
+		}
+		return 401;
+	}
+
+	location /public {
+		return 200;
+	}
+
+sudo systemctl restart nginx
+```
+
+## Test tools
+
+OBS >> Ngnix >> VLC Player
+
+- OBS Stream configuration: 
+```
+In the Controls section of the Interface, click on Settings to enter the OBS configuration interface. Enter the Stream tab and enter the Information about your streaming instance.
+
+Service: Custom
+Server: rtmp://<instance_ip>/live
+Stream Key: your_stream_key?pwd=a_secret_password 
+```
+
+- VLC Configuration
+```
+Start VLC and click on Open Media. Click on the Network tab and enter the URL of your Stream.
+
+Please enter a network URL: rtmp://<instance_ip>/live/your_stream_key
+```
+
+# Flutter integration
+
+https://github.com/nhancv/flutter_rtmppublisher
+

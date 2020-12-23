@@ -47,7 +47,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   bool enableAudio = true;
   bool useOpenGL = true;
   TextEditingController _textFieldController = TextEditingController(
-      text: "rtmp://34.70.40.166:1935/LiveApp/815794454132232781694481");
+      text: "rtmp://192.168.1.16/live/your_stream");
 
   Timer _timer;
 
