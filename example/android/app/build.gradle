@@ -39,7 +39,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.whelksoft.rtmppublisher_example"
+        applicationId "com.app.rtmp_publisher_example"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode flutterVersionCode.toInteger()

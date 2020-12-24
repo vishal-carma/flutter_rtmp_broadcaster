@@ -2,9 +2,9 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:camera_with_rtmp/new/camera.dart';
-import 'package:camera_with_rtmp/new/src/camera_testing.dart';
-import 'package:camera_with_rtmp/new/src/common/native_texture.dart';
+import 'package:rtmp_publisher/new/camera.dart';
+import 'package:rtmp_publisher/new/src/camera_testing.dart';
+import 'package:rtmp_publisher/new/src/common/native_texture.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
 

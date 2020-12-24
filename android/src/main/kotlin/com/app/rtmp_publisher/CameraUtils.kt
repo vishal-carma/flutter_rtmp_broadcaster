@@ -1,4 +1,4 @@
-package com.whelksoft.camera_with_rtmp
+package com.app.rtmp_publisher
 
 
 import android.app.Activity
@@ -13,7 +13,7 @@ import android.media.CamcorderProfile
 import android.os.Build
 import android.util.Size
 import androidx.annotation.RequiresApi
-import com.whelksoft.camera_with_rtmp.Camera.ResolutionPreset
+import com.app.rtmp_publisher.Camera.ResolutionPreset
 import java.util.*
 
 

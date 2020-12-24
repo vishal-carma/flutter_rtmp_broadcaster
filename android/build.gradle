@@ -1,4 +1,4 @@
-group 'com.whelksoft.camera_with_rtmp'
+group 'com.app.rtmp_publisher'
 version '1.0-SNAPSHOT'
 
 buildscript {

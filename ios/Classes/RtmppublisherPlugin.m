@@ -1,11 +1,11 @@
 #import "RtmppublisherPlugin.h"
-#if __has_include("camera_with_rtmp/camera_with_rtmp-Swift.h")
-#import <camera_with_rtmp/camera_with_rtmp-Swift.h>
+#if __has_include("rtmp_publisher/rtmp_publisher-Swift.h")
+#import <rtmp_publisher/rtmp_publisher-Swift.h>
 #else
 // Support project import fallback if the generated compatibility header
 // is not copied when this plugin is created as a library.
 // https://forums.swift.org/t/swift-static-libraries-dont-copy-generated-objective-c-header/19816
-#import "camera_with_rtmp-Swift.h"
+#import "rtmp_publisher-Swift.h"
 #endif
 
 #import <AVFoundation/AVFoundation.h>
@@ -848,7 +848,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 - (void)startImageStreamWithMessenger:(NSObject<FlutterBinaryMessenger> *)messenger {
     if (!_isStreamingImages) {
         FlutterEventChannel *eventChannel =
-        [FlutterEventChannel eventChannelWithName:@"plugins.flutter.io/camera_with_rtmp/imageStream"
+        [FlutterEventChannel eventChannelWithName:@"plugins.flutter.io/rtmp_publisher/imageStream"
                                   binaryMessenger:messenger];
         
         _imageStreamHandler = [[FLTImageStreamHandler alloc] init];
@@ -997,7 +997,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 }
 + (void)registerWithRegistrar:(NSObject<FlutterPluginRegistrar> *)registrar {
     FlutterMethodChannel *channel =
-    [FlutterMethodChannel methodChannelWithName:@"plugins.flutter.io/camera_with_rtmp"
+    [FlutterMethodChannel methodChannelWithName:@"plugins.flutter.io/rtmp_publisher"
                                 binaryMessenger:[registrar messenger]];
     RtmppublisherPlugin *instance = [[RtmppublisherPlugin alloc] initWithRegistry:[registrar textures]
                                                                         messenger:[registrar messenger]];
@@ -1015,7 +1015,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
 - (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
     if (_dispatchQueue == nil) {
-        _dispatchQueue = dispatch_queue_create("com.whelksoft.camera_with_rtmp.dispatchqueue", NULL);
+        _dispatchQueue = dispatch_queue_create("com.app.rtmp_publisher.dispatchqueue", NULL);
     }
     
     // Invoke the plugin on another dispatch queue to avoid blocking the UI.
@@ -1078,7 +1078,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
             };
             FlutterEventChannel *eventChannel = [FlutterEventChannel
                                                  eventChannelWithName:[NSString
-                                                                       stringWithFormat:@"plugins.flutter.io/camera_with_rtmp/cameraEvents%lld",
+                                                                       stringWithFormat:@"plugins.flutter.io/rtmp_publisher/cameraEvents%lld",
                                                                        textureId]
                                                  binaryMessenger:_messenger];
             [eventChannel setStreamHandler:cam];

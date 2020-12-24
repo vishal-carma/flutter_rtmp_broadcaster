@@ -1,15 +1,15 @@
 #
 # To learn more about a Podspec see http://guides.cocoapods.org/syntax/podspec.html.
-# Run `pod lib lint rtmppublisher.podspec' to validate before publishing.
+# Run `pod lib lint rtmp_publisher.podspec' to validate before publishing.
 #
 Pod::Spec.new do |s|
-  s.name             = 'camera_with_rtmp'
+  s.name             = 'rtmp_publisher'
   s.version          = '0.0.1'
   s.summary          = 'FLutter plugin to allow rtmp to work with ios.'
   s.description      = <<-DESC
 A new flutter plugin project.
                        DESC
-  s.homepage         = 'https://github.com/pinkfish/flutter_rtmppublisher'
+  s.homepage         = 'https://github.com/nhancv/flutter_rtmp_publisher'
   s.license          = { :file => '../LICENSE' }
   s.author           = { 'WhelkSoft' => 'pinkfish@gmail.com' }
   s.source           = { :path => '.' }

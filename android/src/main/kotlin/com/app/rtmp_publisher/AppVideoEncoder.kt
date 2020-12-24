@@ -1,4 +1,4 @@
-package com.whelksoft.camera_with_rtmp
+package com.app.rtmp_publisher
 
 import android.media.MediaCodec
 import android.media.MediaCodecInfo

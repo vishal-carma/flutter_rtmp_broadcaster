@@ -1,4 +1,4 @@
-# rtmppublisher
+# rtmp_publisher
 
 RTMP streaming and camera plugin.
 
@@ -74,7 +74,7 @@ packagingOptions {
 
 ### Example
 
-[example code](https://github.com/nhancv/flutter_rtmppublisher/tree/master/example)
+[example code](https://github.com/nhancv/flutter_rtmp_publisher/tree/master/example)
 
 -----
 # Install RTMP Server on Ubuntu 18.04
@@ -158,5 +158,5 @@ Please enter a network URL: rtmp://<instance_ip>/live/your_stream_key
 
 # Flutter integration
 
-https://github.com/nhancv/flutter_rtmppublisher
+https://github.com/nhancv/flutter_rtmp_publisher
 

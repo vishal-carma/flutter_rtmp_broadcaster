@@ -1,4 +1,4 @@
-package com.whelksoft.camera_with_rtmp
+package com.app.rtmp_publisher
 
 import android.annotation.SuppressLint
 import android.app.Activity

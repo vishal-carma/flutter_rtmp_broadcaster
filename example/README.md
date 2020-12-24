@@ -1,6 +1,6 @@
-# rtmppublisher_example
+# rtmp_publisher_example
 
-Demonstrates how to use the rtmppublisher plugin.
+Demonstrates how to use the rtmp_publisher plugin.
 
 ## Getting Started
 

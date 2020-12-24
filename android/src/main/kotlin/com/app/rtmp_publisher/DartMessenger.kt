@@ -1,4 +1,4 @@
-package com.whelksoft.camera_with_rtmp
+package com.app.rtmp_publisher
 
 import android.text.TextUtils
 import io.flutter.plugin.common.BinaryMessenger
@@ -33,7 +33,7 @@ class DartMessenger(messenger: BinaryMessenger, eventChannelId: Long) {
 
     init {
         assert(messenger != null);
-        EventChannel(messenger, "plugins.flutter.io/camera_with_rtmp/cameraEvents$eventChannelId")
+        EventChannel(messenger, "plugins.flutter.io/rtmp_publisher/cameraEvents$eventChannelId")
                 .setStreamHandler(
                         object : EventChannel.StreamHandler {
                             override fun onListen(arguments: Any?, sink: EventSink) {
