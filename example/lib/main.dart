@@ -46,8 +46,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   VoidCallback videoPlayerListener;
   bool enableAudio = true;
   bool useOpenGL = true;
-  TextEditingController _textFieldController = TextEditingController(
-      text: "rtmp://192.168.1.16/live/your_stream");
+  TextEditingController _textFieldController =
+      TextEditingController(text: "rtmp://192.168.1.16/live/your_stream");
 
   Timer _timer;
 
