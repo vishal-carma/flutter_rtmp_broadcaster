@@ -163,7 +163,7 @@ Please enter a network URL: rtmp://<instance_ip>/live/your_stream_key
 
 # Note for MUX Server
 ```
-- RTMP Url (for publisher): rtmp://global-live.mux.com:5222/app/${streamKey}
+- RTMP Url (for publisher): rtmp://live.mux.com/app/${streamkey}
 - Stream Url (for client): https://stream.mux.com/${playbackId}.m3u8
 - Poster Url (for preview): https://image.mux.com/${playbackId}/thumbnail.jpg
 ```
