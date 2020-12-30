@@ -140,7 +140,7 @@ sudo systemctl restart nginx
 
 OBS >> Ngnix >> VLC Player
 
-- OBS Stream configuration: 
+- OBS Publisher configuration: 
 ```
 In the Controls section of the Interface, click on Settings to enter the OBS configuration interface. Enter the Stream tab and enter the Information about your streaming instance.
 
@@ -149,14 +149,21 @@ Server: rtmp://<instance_ip>/live
 Stream Key: your_stream_key?pwd=a_secret_password 
 ```
 
-- VLC Configuration
+- VLC Stream Viewer Configuration
 ```
 Start VLC and click on Open Media. Click on the Network tab and enter the URL of your Stream.
 
 Please enter a network URL: rtmp://<instance_ip>/live/your_stream_key
 ```
 
-# Flutter integration
+# Flutter
 
-https://github.com/nhancv/flutter_rtmp_publisher
+- RTMP Publisher: https://github.com/nhancv/flutter_rtmp_publisher
+- Stream Viewer: https://pub.dev/packages/ext_video_player
 
+# Note for MUX Server
+```
+- RTMP Url (for publisher): rtmp://global-live.mux.com:5222/app/${streamkey}
+- Stream Url (for client): https://stream.mux.com/${playbackId}.m3u8
+- Poster Url (for preview): https://image.mux.com/${playbackId}/thumbnail.jpg
+```
