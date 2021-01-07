@@ -47,7 +47,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   bool enableAudio = true;
   bool useOpenGL = true;
   TextEditingController _textFieldController =
-      TextEditingController(text: "rtmp://192.168.1.16/live/your_stream");
+      TextEditingController(text: "rtmp://192.168.68.116/live/your_stream");
 
   Timer _timer;
 
@@ -586,8 +586,10 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       url = myUrl;
       await controller.startVideoStreaming(url);
       _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
-        var stats = await controller.getStreamStatistics();
-        print(stats);
+        if(controller != null && controller.value.isStreamingVideoRtmp) {
+          var stats = await controller.getStreamStatistics();
+          print(stats);
+        }
       });
     } on CameraException catch (e) {
       _showCameraException(e);
