@@ -85,7 +85,7 @@ https://topdev.vn/blog/streaming-media-voi-nginx-va-nginx-rtmp-module/
 
 - RTMP publisher: https://obsproject.com/
 - RTMP client player: https://www.videolan.org/vlc/index.html
-- RTMP server: 
+- RTMP server: https://github.com/arut/nginx-rtmp-module
 ```
 sudo apt update
 sudo apt install build-essential libpcre3 libpcre3-dev libssl-dev nginx libnginx-mod-rtmp ffmpeg -y
@@ -133,7 +133,30 @@ sudo nano /etc/nginx/sites-enabled/default
 		return 200;
 	}
 
+    location /stat {
+        rtmp_stat all;
+        rtmp_stat_stylesheet stat.xsl;
+        # Allow access from any visitor
+        allow all;
+        # Live updates for the stat page
+        add_header Refresh "3; $request_uri";
+    }
+
+    location /stat.xsl {
+        root /var/www/;
+    }
+
+    location /control {
+        rtmp_control all;
+
+        # Enable CORS
+        add_header Access-Control-Allow-Origin * always;
+    }
+
 sudo systemctl restart nginx
+
+cd /var/www/
+sudo wget https://raw.githubusercontent.com/arut/nginx-rtmp-module/master/stat.xsl
 ```
 
 ## Test tools

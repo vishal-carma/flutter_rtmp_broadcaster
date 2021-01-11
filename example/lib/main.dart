@@ -555,8 +555,10 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       videoPath = filePath;
       await controller.startVideoRecordingAndStreaming(videoPath, url);
       _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
-        var stats = await controller.getStreamStatistics();
-        print(stats);
+        if(controller != null && controller.value.isStreamingVideoRtmp) {
+          var stats = await controller.getStreamStatistics();
+          print(stats);
+        }
       });
     } on CameraException catch (e) {
       _showCameraException(e);
