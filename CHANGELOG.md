@@ -1,3 +1,7 @@
+## 0.3.6
+
+* Update ios podspec
+
 ## 0.3.5
 
 * Update example
