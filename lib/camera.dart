@@ -212,6 +212,7 @@ class CameraValue {
     this.isTakingPicture,
     this.isStreamingImages,
     this.isStreamingVideoRtmp,
+    this.event,
     bool isRecordingPaused,
     bool isStreamingPaused,
   })  : _isRecordingPaused = isRecordingPaused,
@@ -227,6 +228,7 @@ class CameraValue {
           isRecordingPaused: false,
           isStreamingPaused: false,
           previewQuarterTurns: 0,
+          event: null,
         );
 
   /// True after [CameraController.initialize] has completed successfully.
@@ -265,6 +267,9 @@ class CameraValue {
   /// Is `null` until  [isInitialized] is `true`.
   final int previewQuarterTurns;
 
+  /// Raw event info
+  final dynamic event;
+
   /// Convenience getter for `previewSize.height / previewSize.width`.
   ///
   /// Can only be called when [initialize] is done.
@@ -283,6 +288,7 @@ class CameraValue {
     int previewQuarterTurns,
     bool isRecordingPaused,
     bool isStreamingPaused,
+    dynamic event,
   }) {
     return CameraValue(
       isInitialized: isInitialized ?? this.isInitialized,
@@ -295,6 +301,7 @@ class CameraValue {
       isStreamingImages: isStreamingImages ?? this.isStreamingImages,
       isRecordingPaused: isRecordingPaused ?? _isRecordingPaused,
       isStreamingPaused: isStreamingPaused ?? _isStreamingPaused,
+      event: event,
     );
   }
 
@@ -418,29 +425,45 @@ class CameraController extends ValueNotifier<CameraValue> {
   /// A "cameraClosing" event is sent when the camera is closed automatically by the system (for example when the app go to background). The plugin will try to reopen the camera automatically but any ongoing recording will end.
   void _listener(dynamic event) {
     final Map<dynamic, dynamic> map = event;
-    if (_isDisposed) {
+    if (_isDisposed || event == null) {
       return;
     }
 
-    print("Event $map");
-    switch (map['eventType']) {
+    // Android: Event {eventType: rtmp_retry, errorDescription: BadName received}
+    // iOS: Event {event: rtmp_retry, errorDescription: connection failed rtmpStatus}
+    final String eventType =
+        map['eventType'] as String ?? map['event'] as String;
+    final String errorDescription = map['errorDescription'];
+    final Map<String, dynamic> uniEvent = <String, dynamic>{
+      'eventType': eventType,
+      'errorDescription': errorDescription
+    };
+    switch (eventType) {
       case 'error':
-        value = value.copyWith(errorDescription: event['errorDescription']);
+        value =
+            value.copyWith(errorDescription: errorDescription, event: uniEvent);
         break;
       case 'camera_closing':
         value = value.copyWith(
-            isRecordingVideo: false, isStreamingVideoRtmp: false);
+            isRecordingVideo: false,
+            isStreamingVideoRtmp: false,
+            event: uniEvent);
         break;
       case 'rtmp_connected':
+        value = value.copyWith(event: uniEvent);
         break;
       case 'rtmp_retry':
+        value = value.copyWith(event: uniEvent);
         break;
       case 'rtmp_stopped':
-        value = value.copyWith(isStreamingVideoRtmp: false);
+        value = value.copyWith(isStreamingVideoRtmp: false, event: uniEvent);
         break;
       case 'rotation_update':
         value = value.copyWith(
-            previewQuarterTurns: int.parse(event['errorDescription']));
+            previewQuarterTurns: int.parse(errorDescription), event: uniEvent);
+        break;
+      default:
+        value = value.copyWith(event: uniEvent);
         break;
     }
   }
@@ -845,7 +868,7 @@ class CameraController extends ValueNotifier<CameraValue> {
         <String, dynamic>{'textureId': _textureId},
       );
     } on PlatformException catch (e) {
-      print("GOt exception " + e.toString());
+      print("Got exception " + e.toString());
       throw CameraException(e.code, e.message);
     }
   }

@@ -1,3 +1,7 @@
+## 0.3.7
+
+* Export full event info
+
 ## 0.3.6
 
 * Update ios podspec

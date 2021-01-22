@@ -1,6 +1,6 @@
 name: rtmp_publisher
 description: Controlling the camera on Android and iOS plus rtmp live streaming support. Based off the Camera plugin.
-version: 0.3.6
+version: 0.3.7
 homepage: https://github.com/nhancv/flutter_rtmp_publisher
 
 environment:
