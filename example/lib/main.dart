@@ -50,6 +50,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       TextEditingController(text: "rtmp://192.168.68.116/live/your_stream");
 
   bool get isStreaming => controller?.value?.isStreamingVideoRtmp ?? false;
+  bool isVisible = true;
 
   @override
   void initState() {
@@ -60,6 +61,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    Wakelock.disable();
     super.dispose();
   }
 
@@ -74,10 +76,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       return;
     }
     if (state == AppLifecycleState.inactive) {
+      isVisible = false;
       if(isStreaming) {
         await pauseVideoStreaming();
       }
     } else if (state == AppLifecycleState.resumed) {
+      isVisible = true;
       if (controller != null) {
         if(isStreaming) {
           await resumeVideoStreaming();
@@ -313,6 +317,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   void onNewCameraSelected(CameraDescription cameraDescription) async {
     if (controller != null) {
+      await stopVideoStreaming();
       await controller.dispose();
     }
     controller = CameraController(
@@ -323,11 +328,26 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     );
 
     // If the controller is updated then update the UI.
-    controller.addListener(() {
+    controller.addListener(() async {
       if (mounted) setState(() {});
       if (controller.value.hasError) {
         showInSnackBar('Camera error ${controller.value.errorDescription}');
-        Wakelock.disable();
+        await stopVideoStreaming();
+      } else {
+        try {
+          final Map<dynamic, dynamic> event =
+          controller.value.event as Map<dynamic, dynamic>;
+          if (event != null) {
+            print('Event $event');
+            final String eventType = event['eventType'] as String;
+            if (isVisible && isStreaming && eventType == 'rtmp_retry') {
+              showInSnackBar('BadName received, endpoint in use.');
+              await stopVideoStreaming();
+            }
+          }
+        } catch (e) {
+          print(e);
+        }
       }
     });
 
