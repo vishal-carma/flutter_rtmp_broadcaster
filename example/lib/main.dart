@@ -49,7 +49,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   TextEditingController _textFieldController =
       TextEditingController(text: "rtmp://192.168.68.116/live/your_stream");
 
-  Timer _timer;
+  bool get isStreaming => controller?.value?.isStreamingVideoRtmp ?? false;
 
   @override
   void initState() {
@@ -64,20 +64,27 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
+  Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
+    // App state changed before we got the chance to initialize.
+    if (controller == null || !controller.value.isInitialized) {
+      return;
+    }
     // App state changed before we got the chance to initialize.
     if (controller == null || !controller.value.isInitialized) {
       return;
     }
     if (state == AppLifecycleState.inactive) {
-      controller?.dispose();
-      if (_timer != null) {
-        _timer.cancel();
-        _timer = null;
+      if(isStreaming) {
+        await pauseVideoStreaming();
       }
     } else if (state == AppLifecycleState.resumed) {
       if (controller != null) {
-        onNewCameraSelected(controller.description);
+        if(isStreaming) {
+          await resumeVideoStreaming();
+        } else {
+          onNewCameraSelected(controller.description);
+        }
+
       }
     }
   }
@@ -320,10 +327,6 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
       if (mounted) setState(() {});
       if (controller.value.hasError) {
         showInSnackBar('Camera error ${controller.value.errorDescription}');
-        if (_timer != null) {
-          _timer.cancel();
-          _timer = null;
-        }
         Wakelock.disable();
       }
     });
@@ -547,19 +550,9 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     final String filePath = '$dirPath/${timestamp()}.mp4';
 
     try {
-      if (_timer != null) {
-        _timer.cancel();
-        _timer = null;
-      }
       url = myUrl;
       videoPath = filePath;
       await controller.startVideoRecordingAndStreaming(videoPath, url);
-      _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
-        if(controller != null && controller.value.isStreamingVideoRtmp) {
-          var stats = await controller.getStreamStatistics();
-          print(stats);
-        }
-      });
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -568,12 +561,16 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   Future<String> startVideoStreaming() async {
+    await stopVideoStreaming();
+    if (controller == null) {
+      return null;
+    }
     if (!controller.value.isInitialized) {
       showInSnackBar('Error: select a camera first.');
       return null;
     }
 
-    if (controller.value.isStreamingVideoRtmp) {
+    if (controller?.value?.isStreamingVideoRtmp ?? false) {
       return null;
     }
 
@@ -581,18 +578,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     String myUrl = await _getUrl();
 
     try {
-      if (_timer != null) {
-        _timer.cancel();
-        _timer = null;
-      }
       url = myUrl;
       await controller.startVideoStreaming(url);
-      _timer = Timer.periodic(Duration(seconds: 1), (timer) async {
-        if(controller != null && controller.value.isStreamingVideoRtmp) {
-          var stats = await controller.getStreamStatistics();
-          print(stats);
-        }
-      });
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -601,16 +588,16 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   Future<void> stopVideoStreaming() async {
+
+    if (controller == null || !controller.value.isInitialized) {
+      return;
+    }
     if (!controller.value.isStreamingVideoRtmp) {
-      return null;
+      return;
     }
 
     try {
       await controller.stopVideoStreaming();
-      if (_timer != null) {
-        _timer.cancel();
-        _timer = null;
-      }
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
