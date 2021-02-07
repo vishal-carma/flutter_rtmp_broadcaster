@@ -48,12 +48,12 @@ Or in text format add the key:
 <string></string>
 <key>UIBackgroundModes</key>
 <array>
-    <string>audio</string>
+    <string>processing</string>
 </array>
 <key>NSCameraUsageDescription</key>
-<string>Can I use the camera please?</string>
+<string>App requires access to the camera for live streaming feature.</string>
 <key>NSMicrophoneUsageDescription</key>
-<string>Can I use the mic please?</string>
+<string>App requires access to the microphone for live streaming feature.</string>
 ```
 
 ### Android
