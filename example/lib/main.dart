@@ -71,11 +71,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     if (controller == null || !controller.value.isInitialized) {
       return;
     }
-    // App state changed before we got the chance to initialize.
-    if (controller == null || !controller.value.isInitialized) {
-      return;
-    }
-    if (state == AppLifecycleState.inactive) {
+    if (state == AppLifecycleState.paused) {
       isVisible = false;
       if(isStreaming) {
         await pauseVideoStreaming();
