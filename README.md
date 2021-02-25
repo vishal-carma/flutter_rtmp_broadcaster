@@ -182,7 +182,7 @@ Please enter a network URL: rtmp://<instance_ip>/live/your_stream_key
 # Flutter
 
 - RTMP Publisher: https://github.com/nhancv/flutter_rtmp_publisher
-- Stream Viewer: https://pub.dev/packages/ext_video_player
+- Stream Viewer: https://pub.dev/packages/fijkplayer
 
 # Note for MUX Server
 ```
