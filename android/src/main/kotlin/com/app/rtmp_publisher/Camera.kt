@@ -93,7 +93,7 @@ class Camera(
 //        orientationEventListener.enable()
         val characteristics = cameraManager.getCameraCharacteristics(cameraName)
         isFrontFacing = characteristics.get(CameraCharacteristics.LENS_FACING) == CameraMetadata.LENS_FACING_FRONT
-        sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)
+        sensorOrientation = characteristics.get(CameraCharacteristics.SENSOR_ORIENTATION)!!
         currentOrientation = Math.round(activity.resources.configuration.orientation / 90.0).toInt() * 90
         val preset = ResolutionPreset.valueOf(resolutionPreset!!)
         recordingProfile = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, preset)
@@ -631,7 +631,7 @@ class Camera(
                 // Start capturing from the camera.
                 createCaptureSession(
                         CameraDevice.TEMPLATE_RECORD,
-                        Runnable { rtmpCamera!!.startStream(url) }
+                        Runnable { rtmpCamera.startStream(url) }
 //                        , rtmpCamera!!.inputSurface
                 )
             } else {
@@ -853,17 +853,17 @@ class Camera(
         }
     }
 
-    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
+    override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
         val surfaceTexture = flutterTexture.surfaceTexture()
         val size = getSizePairByOrientation()
         surfaceTexture.setDefaultBufferSize(size.first, size.second)
         val flutterSurface = Surface(surfaceTexture)
     }
 
-    override fun surfaceDestroyed(holder: SurfaceHolder?) {
+    override fun surfaceDestroyed(holder: SurfaceHolder) {
     }
 
-    override fun surfaceCreated(holder: SurfaceHolder?) {
+    override fun surfaceCreated(holder: SurfaceHolder) {
 
     }
 }

@@ -52,6 +52,14 @@ class CameraNativeView(
         startPreview(cameraName)
     }
 
+    override fun surfaceChanged(p0: SurfaceHolder, p1: Int, p2: Int, p3: Int) {
+        TODO("Not yet implemented")
+    }
+
+    override fun surfaceDestroyed(p0: SurfaceHolder) {
+        TODO("Not yet implemented")
+    }
+
     override fun onAuthSuccessRtmp() {
     }
 
@@ -82,14 +90,6 @@ class CameraNativeView(
         activity?.runOnUiThread {
             dartMessenger?.send(DartMessenger.EventType.RTMP_STOPPED, "Disconnected")
         }
-    }
-
-    override fun surfaceChanged(holder: SurfaceHolder?, format: Int, width: Int, height: Int) {
-        Log.d("CameraNativeView", "surfaceChanged $width $height")
-    }
-
-    override fun surfaceDestroyed(holder: SurfaceHolder?) {
-        Log.d("CameraNativeView", "surfaceDestroyed")
     }
 
     fun close() {

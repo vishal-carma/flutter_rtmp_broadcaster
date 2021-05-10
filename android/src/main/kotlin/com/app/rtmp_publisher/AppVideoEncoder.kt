@@ -18,7 +18,6 @@ import com.pedro.encoder.video.FormatVideoEncoder
 import com.pedro.encoder.video.GetVideoData
 import java.io.IOException
 import java.nio.ByteBuffer
-import java.util.List
 
 /*
  * Encodes the data going over the wire to the backend system, this handles talking
@@ -53,7 +52,7 @@ class AppVideoEncoder(
     var force: CodecUtil.Force = CodecUtil.Force.FIRST_COMPATIBLE_FOUND
     private val bufferInfo: MediaCodec.BufferInfo = MediaCodec.BufferInfo()
 
-    @kotlin.jvm.Volatile
+    @Volatile
     public var running = false
 
     // The fps to limit at
@@ -218,8 +217,8 @@ class AppVideoEncoder(
     private fun sendSPSandPPS(mediaFormat: MediaFormat) {
         //H265
         if (type!!.equals(CodecUtil.H265_MIME)) {
-            val byteBufferList = extractVpsSpsPpsFromH265(mediaFormat.getByteBuffer("csd-0"))
-            getVideoData.onSpsPpsVps(byteBufferList!![1], byteBufferList[2], byteBufferList[0])
+            val byteBufferList: List<ByteBuffer> = extractVpsSpsPpsFromH265(mediaFormat.getByteBuffer("csd-0")!!)
+            getVideoData.onSpsPpsVps(byteBufferList[1], byteBufferList[2], byteBufferList[0])
             //H264
         } else {
             getVideoData.onSpsPps(mediaFormat.getByteBuffer("csd-0"), mediaFormat.getByteBuffer("csd-1"))
@@ -337,7 +336,7 @@ class AppVideoEncoder(
         return byteBufferList as List<ByteBuffer>
     }
 
-    @kotlin.jvm.Throws(IllegalStateException::class)
+    @Throws(IllegalStateException::class)
     protected fun getDataFromEncoder() {
         Log.i(TAG, "getDataFromEncoder")
 
@@ -379,7 +378,7 @@ class AppVideoEncoder(
         getVideoData.getVideoData(byteBuffer, bufferInfo)
     }
 
-    @kotlin.jvm.Throws(IllegalStateException::class)
+    @Throws(IllegalStateException::class)
     private fun processOutput(byteBuffer: ByteBuffer, mediaCodec: MediaCodec,
                               outBufferIndex: Int, bufferInfo: MediaCodec.BufferInfo) {
         if (running) {
@@ -396,7 +395,7 @@ class AppVideoEncoder(
         Log.i(TAG, "createAsyncCallback")
         callback = object : MediaCodec.Callback() {
             override fun onInputBufferAvailable(mediaCodec: MediaCodec, inBufferIndex: Int) {
-               Log.i(TAG, "onInputBufferAvailable ignored")
+                Log.i(TAG, "onInputBufferAvailable ignored")
             }
 
             override fun onOutputBufferAvailable(mediaCodec: MediaCodec, outBufferIndex: Int,
@@ -427,7 +426,7 @@ class AppVideoEncoder(
         } else {
             mediaCodec.getOutputBuffers().get(outBufferIndex)
         }
-        processOutput(byteBuffer, mediaCodec, outBufferIndex, bufferInfo)
+        processOutput(byteBuffer!!, mediaCodec, outBufferIndex, bufferInfo)
     }
 
     companion object {
