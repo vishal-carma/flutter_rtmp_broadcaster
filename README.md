@@ -1,4 +1,4 @@
-# Flutter RTMP publisher
+# Flutter RTMP broadcaster
 
 RTMP streaming and camera plugin.
 
