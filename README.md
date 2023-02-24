@@ -73,6 +73,19 @@ Change the minimum Android sdk version to 21 (or higher) in your `android/app/bu
     minSdkVersion 21
 ```
 
+and add the following part to your `android/app/src/build.gradle` file:
+
+```
+android {
+    ...
+    packagingOptions {
+        exclude 'project.clj'
+    }
+}
+```
+
+in order to prevent packaging problems.
+
 # Note for MUX Server
 
 * RTMP Url (for publisher): rtmp://live.mux.com/app/${streamkey}
