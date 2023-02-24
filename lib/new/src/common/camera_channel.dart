@@ -24,15 +24,12 @@ class CameraChannel {
   static int nextHandle = 0;
 
   static void registerCallback(int handle, CameraCallback callback) {
-    assert(handle != null);
-    assert(CameraCallback != null);
 
     assert(!callbacks.containsKey(handle));
     callbacks[handle] = callback;
   }
 
   static void unregisterCallback(int handle) {
-    assert(handle != null);
     callbacks.remove(handle);
   }
 }

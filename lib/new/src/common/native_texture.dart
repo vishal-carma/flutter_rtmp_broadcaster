@@ -17,9 +17,7 @@ import 'camera_mixins.dart';
 /// The [textureId] can be passed to a [Texture] widget.
 class NativeTexture with CameraMappable {
   NativeTexture._({required int handle, required this.textureId})
-      : _handle = handle,
-        assert(handle != null),
-        assert(textureId != null);
+      : _handle = handle;
 
   final int _handle;
 

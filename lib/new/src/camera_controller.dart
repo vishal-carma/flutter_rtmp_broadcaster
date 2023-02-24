@@ -46,9 +46,7 @@ class CameraController {
     required this.description,
     required this.configurator,
     required this.api,
-  })  : assert(description != null),
-        assert(configurator != null),
-        assert(api != null);
+  });
 
   /// Constructor for defining your own [CameraConfigurator].
   ///
@@ -107,10 +105,7 @@ class CameraController {
     final Completer<void> completer = Completer<void>();
 
     if (_instance != null) {
-      _instance!
-          .dispose()
-          .then((_) => configurator.initialize())
-          .then((_) => completer.complete());
+      _instance!.dispose().then((_) => configurator.initialize()).then((_) => completer.complete());
     }
     _instance = this;
 
@@ -152,8 +147,6 @@ class CameraController {
       case CameraApi.supportAndroid:
         throw UnimplementedError();
     }
-
-    return null; // Unreachable code
   }
 
   static CameraApi _getCameraApi(CameraDescriptionNew description) {

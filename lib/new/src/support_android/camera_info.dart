@@ -2,8 +2,6 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
-import 'package:flutter/foundation.dart';
-
 import '../common/camera_interface.dart';
 
 /// The direction that the camera faces.
@@ -17,9 +15,7 @@ class CameraInfo implements CameraDescriptionNew {
     required this.id,
     required this.facing,
     required this.orientation,
-  })  : assert(id != null),
-        assert(facing != null),
-        assert(orientation != null);
+  });
 
   factory CameraInfo.fromMap(Map<String, dynamic> map) {
     return CameraInfo(
@@ -62,7 +58,5 @@ class CameraInfo implements CameraDescriptionNew {
       case Facing.back:
         return LensDirection.back;
     }
-
-    return null;
   }
 }

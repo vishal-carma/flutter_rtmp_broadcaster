@@ -39,7 +39,7 @@ enum ResolutionPreset {
 }
 
 // ignore: inference_failure_on_function_return_type
-typedef onLatestImageAvailable = Function(CameraImage image);
+typedef LatestImageCallback = Function(CameraImage image);
 
 /// Returns the resolution preset as a String.
 String serializeResolutionPreset(ResolutionPreset resolutionPreset) {
@@ -57,7 +57,6 @@ String serializeResolutionPreset(ResolutionPreset resolutionPreset) {
     case ResolutionPreset.low:
       return 'low';
   }
-  throw ArgumentError('Unknown ResolutionPreset value');
 }
 
 CameraLensDirection _parseCameraLensDirection(String? string) {
@@ -112,7 +111,7 @@ class CameraDescription {
 
   @override
   int get hashCode {
-    return hashValues(name, lensDirection);
+    return [name, lensDirection].hashCode;
   }
 
   @override
@@ -323,7 +322,7 @@ class CameraController extends ValueNotifier<CameraValue> {
     this.description,
     this.resolutionPreset, {
     this.enableAudio = true,
-    this.streamingPreset = null,
+    this.streamingPreset,
     this.androidUseOpenGL = false,
   }) : super(const CameraValue.uninitialized());
 
@@ -494,7 +493,7 @@ class CameraController extends ValueNotifier<CameraValue> {
   /// Throws a [CameraException] if image streaming or video recording has
   /// already started.
   // TODO(bmparr): Add settings for resolution and fps.
-  Future<void> startImageStream(onLatestImageAvailable onAvailable) async {
+  Future<void> startImageStream(LatestImageCallback onAvailable) async {
     if (!value.isInitialized! || _isDisposed) {
       throw CameraException(
         'Uninitialized CameraController',
@@ -748,13 +747,6 @@ class CameraController extends ValueNotifier<CameraValue> {
         'A camera has started streaming images.',
         'startVideoStreaming was called while a camera was streaming images.',
       );
-    }
-
-    if (filePath == null || url == null) {
-      throw CameraException(
-          "Null arguments",
-          "URL $url and path $filePath need to be not null to start "
-              "streaming and recording");
     }
 
     try {
