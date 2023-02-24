@@ -11,7 +11,7 @@ import 'package:flutter/widgets.dart';
 
 part 'camera_image.dart';
 
-final MethodChannel _channel = const MethodChannel('plugins.flutter.io/rtmp_publisher');
+final MethodChannel _channel = const MethodChannel('plugins.flutter.io/required');
 
 enum CameraLensDirection { front, back, external }
 
@@ -371,7 +371,7 @@ class CameraController extends ValueNotifier<CameraValue> {
     } on PlatformException catch (e) {
       throw CameraException(e.code, e.message);
     }
-    _eventSubscription = EventChannel('plugins.flutter.io/rtmp_publisher/cameraEvents$_textureId').receiveBroadcastStream().listen(_listener);
+    _eventSubscription = EventChannel('plugins.flutter.io/required/cameraEvents$_textureId').receiveBroadcastStream().listen(_listener);
     _creatingCompleter!.complete();
     return _creatingCompleter!.future;
   }
@@ -525,7 +525,7 @@ class CameraController extends ValueNotifier<CameraValue> {
     } on PlatformException catch (e) {
       throw CameraException(e.code, e.message);
     }
-    const EventChannel cameraEventChannel = EventChannel('plugins.flutter.io/rtmp_publisher/imageStream');
+    const EventChannel cameraEventChannel = EventChannel('plugins.flutter.io/required/imageStream');
     _imageStreamSubscription = cameraEventChannel.receiveBroadcastStream().listen(
       (dynamic imageData) {
         onAvailable(CameraImage._fromPlatformData(imageData));
