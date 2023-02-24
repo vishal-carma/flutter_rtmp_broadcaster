@@ -1,11 +1,11 @@
 #import "RtmppublisherPlugin.h"
-#if __has_include("rtmp_publisher/rtmp_publisher-Swift.h")
-#import <rtmp_publisher/rtmp_publisher-Swift.h>
+#if __has_include("rtmp_broadcaster/rtmp_broadcaster-Swift.h")
+#import <rtmp_broadcaster/rtmp_broadcaster-Swift.h>
 #else
 // Support project import fallback if the generated compatibility header
 // is not copied when this plugin is created as a library.
 // https://forums.swift.org/t/swift-static-libraries-dont-copy-generated-objective-c-header/19816
-#import "rtmp_publisher-Swift.h"
+#import "rtmp_broadcaster-Swift.h"
 #endif
 
 #import <AVFoundation/AVFoundation.h>
@@ -1015,11 +1015,11 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
 
 - (void)handleMethodCall:(FlutterMethodCall *)call result:(FlutterResult)result {
     if (_dispatchQueue == nil) {
-        _dispatchQueue = dispatch_queue_create("com.app.rtmp_publisher.dispatchqueue", NULL);
+        _dispatchQueue = dispatch_queue_create("com.app.rtmp_broadcaster.dispatchqueue", NULL);
     }
     
     // Invoke the plugin on another dispatch queue to avoid blocking the UI.
-    dispatch_async(_dispatchQueue, ^{
+    dispatch_async(dispatch_get_main_queue(), ^{
         [self handleMethodCallAsync:call result:result];
     });
 }
