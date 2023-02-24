@@ -1,4 +1,4 @@
-# rtmp_publisher
+# Flutter RTMP publisher
 
 RTMP streaming and camera plugin.
 
@@ -6,15 +6,16 @@ RTMP streaming and camera plugin.
 
 This plugin is an extension of the Flutter
 [camera plugin](https://pub.dev/packages/camera) to add in
-rtmp streaming as part of the system.  It works on android and iOS
+rtmp streaming as part of the system. It works on android and iOS
 (but not web).
 
 This means the API Is exactly the same as the camera and
-installation requirements are the same.  The different is there
+installation requirements are the same. The different is there
 is an extra API that is startStreaming(url) that takes an rtmp
 url and starts streaming to that specific url.
 
-For android I use [rtmp-rtsp-stream-client-java](https://github.com/pedroSG94/rtmp-rtsp-stream-client-java)
+For android I
+use [rtmp-rtsp-stream-client-java](https://github.com/pedroSG94/rtmp-rtsp-stream-client-java)
 and for iOS I use
 [HaishinKit.swift](https://github.com/shogo4405/HaishinKit.swift)
 
@@ -56,6 +57,13 @@ Or in text format add the key:
     <string>App requires access to the microphone for live streaming feature.</string>
 ```
 
+## Example
+
+To see an example implementation of this plugin, please refer to
+the [example code](https://github.com/emiliodallatorre/flutter_rtmp_publisher/tree/master/example).
+This includes a demonstration of how to use the `rtmp_publisher` plugin to stream live video to MUX,
+as well as how to capture snapshots and record video. Simply clone the repository and run the app on
+an Android or iOS device.
 
 ### Android
 
