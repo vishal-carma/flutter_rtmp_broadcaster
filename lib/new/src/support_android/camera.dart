@@ -54,7 +54,8 @@ class Camera with NativeMethodCallHandler {
   ///
   /// If [getNumberOfCameras] returns N, the valid id is 0 to N-1.
   static Future<CameraInfo> getCameraInfo(int cameraId) async {
-    final Map<String, dynamic> infoMap = (await CameraChannel.channel.invokeMapMethod<String, dynamic>(
+    final Map<String, dynamic> infoMap =
+        (await CameraChannel.channel.invokeMapMethod<String, dynamic>(
       'Camera#getCameraInfo',
       <String, dynamic>{'cameraId': cameraId},
     ))!;

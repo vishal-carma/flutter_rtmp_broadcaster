@@ -105,7 +105,10 @@ class CameraController {
     final Completer<void> completer = Completer<void>();
 
     if (_instance != null) {
-      _instance!.dispose().then((_) => configurator.initialize()).then((_) => completer.complete());
+      _instance!
+          .dispose()
+          .then((_) => configurator.initialize())
+          .then((_) => completer.complete());
     }
     _instance = this;
 

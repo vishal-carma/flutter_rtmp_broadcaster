@@ -1,3 +1,11 @@
+## 2.1.2
+
+* Reformatted some files
+
+## 2.1.1
+
+* Migrated the entire package to null safety
+
 ## 0.3.7
 
 * Export full event info
