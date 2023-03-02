@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:rtmp_publisher/camera.dart';
+import 'package:rtmp_broadcaster/camera.dart';
 import 'package:e2e/e2e.dart';
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
