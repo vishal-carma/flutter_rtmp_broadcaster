@@ -1,3 +1,8 @@
+## 2.1.3
+
+* Fixed some testing errors
+* Updated Android embedding to v2 in example
+
 ## 2.1.2
 
 * Reformatted some files
