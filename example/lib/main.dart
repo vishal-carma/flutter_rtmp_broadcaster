@@ -21,36 +21,45 @@ class CameraExampleHome extends StatefulWidget {
 }
 
 /// Returns a suitable camera icon for [direction].
-IconData getCameraLensIcon(CameraLensDirection direction) {
+IconData getCameraLensIcon(CameraLensDirection? direction) {
   switch (direction) {
     case CameraLensDirection.back:
       return Icons.camera_rear;
     case CameraLensDirection.front:
       return Icons.camera_front;
     case CameraLensDirection.external:
+    default:
       return Icons.camera;
   }
-  throw ArgumentError('Unknown lens direction');
 }
 
-void logError(String code, String message) =>
-    print('Error: $code\nError Message: $message');
+void logError(String code, String message) => print('Error: $code\nError Message: $message');
 
-class _CameraExampleHomeState extends State<CameraExampleHome>
-    with WidgetsBindingObserver {
-  CameraController controller;
-  String imagePath;
-  String videoPath;
-  String url;
-  VideoPlayerController videoController;
-  VoidCallback videoPlayerListener;
+class _CameraExampleHomeState extends State<CameraExampleHome> with WidgetsBindingObserver {
+  CameraController? controller;
+  String? imagePath;
+  String? videoPath;
+  String? url;
+  VideoPlayerController? videoController;
+  VoidCallback? videoPlayerListener;
   bool enableAudio = true;
   bool useOpenGL = true;
-  TextEditingController _textFieldController =
-      TextEditingController(text: "rtmp://192.168.68.116/live/your_stream");
+  TextEditingController _textFieldController = TextEditingController(text: "rtmp://192.168.68.116/live/your_stream");
 
-  bool get isStreaming => controller?.value?.isStreamingVideoRtmp ?? false;
+  bool get isStreaming => controller?.value.isStreamingVideoRtmp ?? false;
   bool isVisible = true;
+
+  bool get isControllerInitialized => controller?.value.isInitialized ?? false;
+
+  bool get isStreamingVideoRtmp => controller?.value.isStreamingVideoRtmp ?? false;
+
+  bool get isRecordingVideo => controller?.value.isRecordingVideo ?? false;
+
+  bool get isRecordingPaused => controller?.value.isRecordingPaused ?? false;
+
+  bool get isStreamingPaused => controller?.value.isStreamingPaused ?? false;
+
+  bool get isTakingPicture => controller?.value.isTakingPicture ?? false;
 
   @override
   void initState() {
@@ -68,7 +77,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   @override
   Future<void> didChangeAppLifecycleState(AppLifecycleState state) async {
     // App state changed before we got the chance to initialize.
-    if (controller == null || !controller.value.isInitialized) {
+    if (controller == null || !isControllerInitialized) {
       return;
     }
     if (state == AppLifecycleState.paused) {
@@ -82,7 +91,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         if (isStreaming) {
           await resumeVideoStreaming();
         } else {
-          onNewCameraSelected(controller.description);
+          onNewCameraSelected(controller!.description);
         }
       }
     }
@@ -92,6 +101,16 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   @override
   Widget build(BuildContext context) {
+    Color color = Colors.grey;
+
+    if (controller != null) {
+      if (controller!.value.isRecordingVideo ?? false) {
+        color = Colors.redAccent;
+      } else if (controller!.value.isStreamingVideoRtmp ?? false) {
+        color = Colors.blueAccent;
+      }
+    }
+
     return Scaffold(
       key: _scaffoldKey,
       appBar: AppBar(
@@ -110,14 +129,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
               decoration: BoxDecoration(
                 color: Colors.black,
                 border: Border.all(
-                  color: controller != null && controller.value.isRecordingVideo
-                      ? controller.value.isStreamingVideoRtmp
-                          ? Colors.redAccent
-                          : Colors.orangeAccent
-                      : controller != null &&
-                              controller.value.isStreamingVideoRtmp
-                          ? Colors.blueAccent
-                          : Colors.grey,
+                  color: color,
                   width: 3.0,
                 ),
               ),
@@ -142,7 +154,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   /// Display the preview from the camera (or a message if the preview is not available).
   Widget _cameraPreviewWidget() {
-    if (controller == null || !controller.value.isInitialized) {
+    if (controller == null || !isControllerInitialized) {
       return const Text(
         'Tap a camera',
         style: TextStyle(
@@ -151,12 +163,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
           fontWeight: FontWeight.w900,
         ),
       );
-    } else {
-      return AspectRatio(
-        aspectRatio: controller.value.aspectRatio,
-        child: CameraPreview(controller),
-      );
     }
+
+    return AspectRatio(
+      aspectRatio: controller!.value.aspectRatio,
+      child: CameraPreview(controller!),
+    );
   }
 
   /// Toggle recording audio
@@ -171,7 +183,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
             onChanged: (bool value) {
               enableAudio = value;
               if (controller != null) {
-                onNewCameraSelected(controller.description);
+                onNewCameraSelected(controller!.description);
               }
             },
           ),
@@ -192,18 +204,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
                 ? Container()
                 : SizedBox(
                     child: (videoController == null)
-                        ? Image.file(File(imagePath))
+                        ? Image.file(File(imagePath!))
                         : Container(
                             child: Center(
-                              child: AspectRatio(
-                                  aspectRatio:
-                                      videoController.value.size != null
-                                          ? videoController.value.aspectRatio
-                                          : 1.0,
-                                  child: VideoPlayer(videoController)),
+                              child: AspectRatio(aspectRatio: videoController!.value.aspectRatio, child: VideoPlayer(videoController!)),
                             ),
-                            decoration: BoxDecoration(
-                                border: Border.all(color: Colors.pink)),
+                            decoration: BoxDecoration(border: Border.all(color: Colors.pink)),
                           ),
                     width: 64.0,
                     height: 64.0,
@@ -216,6 +222,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   /// Display the control bar with buttons to take pictures and record videos.
   Widget _captureControlRowWidget() {
+    if (controller == null) return Container();
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       mainAxisSize: MainAxisSize.max,
@@ -223,55 +231,29 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         IconButton(
           icon: const Icon(Icons.camera_alt),
           color: Colors.blue,
-          onPressed: controller != null && controller.value.isInitialized
-              ? onTakePictureButtonPressed
-              : null,
+          onPressed: controller != null && isControllerInitialized ? onTakePictureButtonPressed : null,
         ),
         IconButton(
           icon: const Icon(Icons.videocam),
           color: Colors.blue,
-          onPressed: controller != null &&
-                  controller.value.isInitialized &&
-                  !controller.value.isRecordingVideo
-              ? onVideoRecordButtonPressed
-              : null,
+          onPressed: controller != null && isControllerInitialized && !isRecordingVideo ? onVideoRecordButtonPressed : null,
         ),
         IconButton(
           icon: const Icon(Icons.watch),
           color: Colors.blue,
-          onPressed: controller != null &&
-                  controller.value.isInitialized &&
-                  !controller.value.isStreamingVideoRtmp
-              ? onVideoStreamingButtonPressed
-              : null,
+          onPressed: controller != null && isControllerInitialized && !isStreamingVideoRtmp ? onVideoStreamingButtonPressed : null,
         ),
         IconButton(
-          icon: controller != null &&
-                  (controller.value.isRecordingPaused ||
-                      controller.value.isStreamingPaused)
-              ? Icon(Icons.play_arrow)
-              : Icon(Icons.pause),
+          icon: controller != null && (isRecordingPaused || isStreamingPaused) ? Icon(Icons.play_arrow) : Icon(Icons.pause),
           color: Colors.blue,
-          onPressed: controller != null &&
-                  controller.value.isInitialized &&
-                  (controller.value.isRecordingVideo ||
-                      controller.value.isStreamingVideoRtmp)
-              ? (controller != null &&
-                      (controller.value.isRecordingPaused ||
-                          controller.value.isStreamingPaused)
-                  ? onResumeButtonPressed
-                  : onPauseButtonPressed)
+          onPressed: controller != null && isControllerInitialized && (isRecordingVideo || isStreamingVideoRtmp)
+              ? (controller != null && (isRecordingPaused || isStreamingPaused) ? onResumeButtonPressed : onPauseButtonPressed)
               : null,
         ),
         IconButton(
           icon: const Icon(Icons.stop),
           color: Colors.red,
-          onPressed: controller != null &&
-                  controller.value.isInitialized &&
-                  (controller.value.isRecordingVideo ||
-                      controller.value.isStreamingVideoRtmp)
-              ? onStopButtonPressed
-              : null,
+          onPressed: controller != null && isControllerInitialized && (isRecordingVideo || isStreamingVideoRtmp) ? onStopButtonPressed : null,
         )
       ],
     );
@@ -292,9 +274,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
               title: Icon(getCameraLensIcon(cameraDescription.lensDirection)),
               groupValue: controller?.description,
               value: cameraDescription,
-              onChanged: controller != null && controller.value.isRecordingVideo
-                  ? null
-                  : onNewCameraSelected,
+              onChanged: (CameraDescription? cld) => isRecordingVideo ? null : onNewCameraSelected(cld),
             ),
           ),
         );
@@ -307,14 +287,15 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   String timestamp() => DateTime.now().millisecondsSinceEpoch.toString();
 
   void showInSnackBar(String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(message)));
   }
 
-  void onNewCameraSelected(CameraDescription cameraDescription) async {
+  void onNewCameraSelected(CameraDescription? cameraDescription) async {
+    if (cameraDescription == null) return;
+
     if (controller != null) {
       await stopVideoStreaming();
-      await controller.dispose();
+      await controller?.dispose();
     }
     controller = CameraController(
       cameraDescription,
@@ -324,31 +305,31 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     );
 
     // If the controller is updated then update the UI.
-    controller.addListener(() async {
+    controller!.addListener(() async {
       if (mounted) setState(() {});
-      if (controller.value.hasError) {
-        showInSnackBar('Camera error ${controller.value.errorDescription}');
-        await stopVideoStreaming();
-      } else {
-        try {
-          final Map<dynamic, dynamic> event =
-              controller.value.event as Map<dynamic, dynamic>;
-          if (event != null) {
+
+      if (controller != null) {
+        if (controller!.value.hasError) {
+          showInSnackBar('Camera error ${controller!.value.errorDescription}');
+          await stopVideoStreaming();
+        } else {
+          try {
+            final Map<dynamic, dynamic> event = controller!.value.event as Map<dynamic, dynamic>;
             print('Event $event');
             final String eventType = event['eventType'] as String;
             if (isVisible && isStreaming && eventType == 'rtmp_retry') {
               showInSnackBar('BadName received, endpoint in use.');
               await stopVideoStreaming();
             }
+          } catch (e) {
+            print(e);
           }
-        } catch (e) {
-          print(e);
         }
       }
     });
 
     try {
-      await controller.initialize();
+      await controller!.initialize();
     } on CameraException catch (e) {
       _showCameraException(e);
     }
@@ -359,44 +340,44 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   void onTakePictureButtonPressed() {
-    takePicture().then((String filePath) {
+    takePicture().then((String? filePath) {
       if (mounted) {
         setState(() {
           imagePath = filePath;
           videoController?.dispose();
           videoController = null;
         });
-        if (filePath != null) showInSnackBar('Picture saved to $filePath');
+        showInSnackBar('Picture saved to $filePath');
       }
     });
   }
 
   void onVideoRecordButtonPressed() {
-    startVideoRecording().then((String filePath) {
+    startVideoRecording().then((String? filePath) {
       if (mounted) setState(() {});
-      if (filePath != null) showInSnackBar('Saving video to $filePath');
+      showInSnackBar('Saving video to $filePath');
       Wakelock.enable();
     });
   }
 
   void onVideoStreamingButtonPressed() {
-    startVideoStreaming().then((String url) {
+    startVideoStreaming().then((String? url) {
       if (mounted) setState(() {});
-      if (url != null) showInSnackBar('Streaming video to $url');
+      showInSnackBar('Streaming video to $url');
       Wakelock.enable();
     });
   }
 
   void onRecordingAndVideoStreamingButtonPressed() {
-    startRecordingAndVideoStreaming().then((String url) {
+    startRecordingAndVideoStreaming().then((String? url) {
       if (mounted) setState(() {});
-      if (url != null) showInSnackBar('Recording streaming video to $url');
+      showInSnackBar('Recording streaming video to $url');
       Wakelock.enable();
     });
   }
 
   void onStopButtonPressed() {
-    if (this.controller.value.isStreamingVideoRtmp) {
+    if (this.isStreamingVideoRtmp) {
       stopVideoStreaming().then((_) {
         if (mounted) setState(() {});
         showInSnackBar('Video streamed to: $url');
@@ -445,25 +426,27 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     });
   }
 
-  Future<String> startVideoRecording() async {
-    if (!controller.value.isInitialized) {
+  Future<String?> startVideoRecording() async {
+    if (!isControllerInitialized) {
       showInSnackBar('Error: select a camera first.');
       return null;
     }
 
-    final Directory extDir = await getExternalStorageDirectory();
+    final Directory? extDir = await getExternalStorageDirectory();
+    if (extDir == null) return null;
+
     final String dirPath = '${extDir.path}/Movies/flutter_test';
     await Directory(dirPath).create(recursive: true);
     final String filePath = '$dirPath/${timestamp()}.mp4';
 
-    if (controller.value.isRecordingVideo) {
+    if (isRecordingVideo) {
       // A recording is already started, do nothing.
       return null;
     }
 
     try {
       videoPath = filePath;
-      await controller.startVideoRecording(filePath);
+      await controller!.startVideoRecording(filePath);
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -472,12 +455,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   Future<void> stopVideoRecording() async {
-    if (!controller.value.isRecordingVideo) {
+    if (!isRecordingVideo) {
       return null;
     }
 
     try {
-      await controller.stopVideoRecording();
+      await controller!.stopVideoRecording();
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -488,29 +471,33 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
   Future<void> pauseVideoRecording() async {
     try {
-      if (controller.value.isRecordingVideo) {
-        await controller.pauseVideoRecording();
+      if (controller!.value.isRecordingVideo!) {
+        await controller!.pauseVideoRecording();
       }
-      if (controller.value.isStreamingVideoRtmp) {
-        await controller.pauseVideoStreaming();
+      if (controller!.value.isStreamingVideoRtmp!) {
+        await controller!.pauseVideoStreaming();
       }
     } on CameraException catch (e) {
       _showCameraException(e);
       rethrow;
+    } catch (e) {
+      print(e);
     }
   }
 
   Future<void> resumeVideoRecording() async {
     try {
-      if (controller.value.isRecordingVideo) {
-        await controller.resumeVideoRecording();
+      if (controller!.value.isRecordingVideo!) {
+        await controller!.resumeVideoRecording();
       }
-      if (controller.value.isStreamingVideoRtmp) {
-        await controller.resumeVideoStreaming();
+      if (controller!.value.isStreamingVideoRtmp!) {
+        await controller!.resumeVideoStreaming();
       }
     } on CameraException catch (e) {
       _showCameraException(e);
       rethrow;
+    } catch (e) {
+      print(e);
     }
   }
 
@@ -530,8 +517,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
             ),
             actions: <Widget>[
               TextButton(
-                child: new Text(
-                    MaterialLocalizations.of(context).cancelButtonLabel),
+                child: new Text(MaterialLocalizations.of(context).cancelButtonLabel),
                 onPressed: () {
                   Navigator.of(context).pop();
                 },
@@ -547,14 +533,13 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
         });
   }
 
-  Future<String> startRecordingAndVideoStreaming() async {
-    if (!controller.value.isInitialized) {
+  Future<String?> startRecordingAndVideoStreaming() async {
+    if (!isControllerInitialized) {
       showInSnackBar('Error: select a camera first.');
       return null;
     }
 
-    if (controller.value.isStreamingVideoRtmp ||
-        controller.value.isStreamingVideoRtmp) {
+    if (controller!.value.isStreamingVideoRtmp == true || controller!.value.isStreamingVideoRtmp == true) {
       return null;
     }
 
@@ -568,7 +553,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     try {
       url = myUrl;
       videoPath = filePath;
-      await controller.startVideoRecordingAndStreaming(videoPath, url);
+      await controller!.startVideoRecordingAndStreaming(videoPath!, url!);
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -576,17 +561,17 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     return url;
   }
 
-  Future<String> startVideoStreaming() async {
+  Future<String?> startVideoStreaming() async {
     await stopVideoStreaming();
     if (controller == null) {
       return null;
     }
-    if (!controller.value.isInitialized) {
+    if (!isControllerInitialized) {
       showInSnackBar('Error: select a camera first.');
       return null;
     }
 
-    if (controller?.value?.isStreamingVideoRtmp ?? false) {
+    if (controller?.value.isStreamingVideoRtmp ?? false) {
       return null;
     }
 
@@ -595,7 +580,7 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
 
     try {
       url = myUrl;
-      await controller.startVideoStreaming(url);
+      await controller!.startVideoStreaming(url!);
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -604,15 +589,15 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   Future<void> stopVideoStreaming() async {
-    if (controller == null || !controller.value.isInitialized) {
+    if (controller == null || !isControllerInitialized) {
       return;
     }
-    if (!controller.value.isStreamingVideoRtmp) {
+    if (!isStreamingVideoRtmp) {
       return;
     }
 
     try {
-      await controller.stopVideoStreaming();
+      await controller!.stopVideoStreaming();
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -620,12 +605,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   Future<void> pauseVideoStreaming() async {
-    if (!controller.value.isStreamingVideoRtmp) {
+    if (!isStreamingVideoRtmp) {
       return null;
     }
 
     try {
-      await controller.pauseVideoStreaming();
+      await controller!.pauseVideoStreaming();
     } on CameraException catch (e) {
       _showCameraException(e);
       rethrow;
@@ -633,12 +618,12 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   Future<void> resumeVideoStreaming() async {
-    if (!controller.value.isStreamingVideoRtmp) {
+    if (!isStreamingVideoRtmp) {
       return null;
     }
 
     try {
-      await controller.resumeVideoStreaming();
+      await controller!.resumeVideoStreaming();
     } on CameraException catch (e) {
       _showCameraException(e);
       rethrow;
@@ -646,16 +631,15 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   Future<void> _startVideoPlayer() async {
-    final VideoPlayerController vcontroller =
-        VideoPlayerController.file(File(videoPath));
+    final VideoPlayerController vcontroller = VideoPlayerController.file(File(videoPath!));
     videoPlayerListener = () {
-      if (videoController != null && videoController.value.size != null) {
+      if (videoController != null) {
         // Refreshing the state to update video player with the correct ratio.
         if (mounted) setState(() {});
-        videoController.removeListener(videoPlayerListener);
+        videoController!.removeListener(videoPlayerListener ?? () {});
       }
     };
-    vcontroller.addListener(videoPlayerListener);
+    vcontroller.addListener(videoPlayerListener ?? () {});
     await vcontroller.setLooping(true);
     await vcontroller.initialize();
     await videoController?.dispose();
@@ -668,23 +652,23 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
     await vcontroller.play();
   }
 
-  Future<String> takePicture() async {
-    if (!controller.value.isInitialized) {
+  Future<String?> takePicture() async {
+    if (!isControllerInitialized) {
       showInSnackBar('Error: select a camera first.');
       return null;
     }
-    final Directory extDir = await getExternalStorageDirectory();
-    final String dirPath = '${extDir.path}/Pictures/flutter_test';
+    final Directory? extDir = await getExternalStorageDirectory();
+    final String dirPath = '${extDir?.path}/Pictures/flutter_test';
     await Directory(dirPath).create(recursive: true);
     final String filePath = '$dirPath/${timestamp()}.jpg';
 
-    if (controller.value.isTakingPicture) {
+    if (isTakingPicture) {
       // A capture is already pending, do nothing.
       return null;
     }
 
     try {
-      await controller.takePicture(filePath);
+      await controller!.takePicture(filePath);
     } on CameraException catch (e) {
       _showCameraException(e);
       return null;
@@ -693,8 +677,8 @@ class _CameraExampleHomeState extends State<CameraExampleHome>
   }
 
   void _showCameraException(CameraException e) {
-    logError(e.code, e.description);
-    showInSnackBar('Error: ${e.code}\n${e.description}');
+    logError(e.code, e.description ?? "No description found");
+    showInSnackBar('Error: ${e.code}\n${e.description ?? "No description found"}');
   }
 }
 
@@ -715,7 +699,7 @@ Future<void> main() async {
     WidgetsFlutterBinding.ensureInitialized();
     cameras = await availableCameras();
   } on CameraException catch (e) {
-    logError(e.code, e.description);
+    logError(e.code, e.description ?? "No description found");
   }
   runApp(CameraApp());
 }
