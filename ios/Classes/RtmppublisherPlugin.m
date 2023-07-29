@@ -760,7 +760,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         if (bitrate == nil || bitrate == 0) {
             bitrate = [NSNumber numberWithInt:160 * 1000];
         }
-        [_rtmpStream openWithUrl:url width: _streamingSize.width height: _streamingSize.height bitrate: bitrate];
+        [_rtmpStream openWithUrl:url width: _streamingSize.width height: _streamingSize.height bitrate: bitrate.integerValue];
         _isStreaming = YES;
         _isStreamingPaused = NO;
         _videoTimeOffset = CMTimeMake(0, 1);

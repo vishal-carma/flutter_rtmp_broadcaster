@@ -39,6 +39,8 @@ public class FlutterRTMPStreaming : NSObject {
         var bits = url.components(separatedBy: "/")
         bits.removeLast()
         self.url = bits.joined(separator: "/")
+        
+        // TODO: Da correggere
         rtmpStream.videoSettings = [
             .width: width,
             .height: height,

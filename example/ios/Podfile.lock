@@ -1,32 +1,24 @@
 PODS:
-  - e2e (0.0.1):
-    - Flutter
   - Flutter (1.0.0)
   - HaishinKit (1.0.13):
     - Logboard (~> 2.1.3)
   - Logboard (2.1.3)
-  - path_provider (0.0.1):
+  - path_provider_foundation (0.0.1):
     - Flutter
-  - path_provider_macos (0.0.1):
-    - Flutter
-  - rtmp_publisher (0.0.1):
+    - FlutterMacOS
+  - rtmp_broadcaster (0.0.1):
     - Flutter
     - HaishinKit (~> 1.0.10)
-  - video_player (0.0.1):
-    - Flutter
-  - video_player_web (0.0.1):
+  - video_player_avfoundation (0.0.1):
     - Flutter
   - wakelock (0.0.1):
     - Flutter
 
 DEPENDENCIES:
-  - e2e (from `.symlinks/plugins/e2e/ios`)
   - Flutter (from `Flutter`)
-  - path_provider (from `.symlinks/plugins/path_provider/ios`)
-  - path_provider_macos (from `.symlinks/plugins/path_provider_macos/ios`)
-  - rtmp_publisher (from `.symlinks/plugins/rtmp_publisher/ios`)
-  - video_player (from `.symlinks/plugins/video_player/ios`)
-  - video_player_web (from `.symlinks/plugins/video_player_web/ios`)
+  - path_provider_foundation (from `.symlinks/plugins/path_provider_foundation/darwin`)
+  - rtmp_broadcaster (from `.symlinks/plugins/rtmp_broadcaster/ios`)
+  - video_player_avfoundation (from `.symlinks/plugins/video_player_avfoundation/ios`)
   - wakelock (from `.symlinks/plugins/wakelock/ios`)
 
 SPEC REPOS:
@@ -35,35 +27,26 @@ SPEC REPOS:
     - Logboard
 
 EXTERNAL SOURCES:
-  e2e:
-    :path: ".symlinks/plugins/e2e/ios"
   Flutter:
     :path: Flutter
-  path_provider:
-    :path: ".symlinks/plugins/path_provider/ios"
-  path_provider_macos:
-    :path: ".symlinks/plugins/path_provider_macos/ios"
-  rtmp_publisher:
-    :path: ".symlinks/plugins/rtmp_publisher/ios"
-  video_player:
-    :path: ".symlinks/plugins/video_player/ios"
-  video_player_web:
-    :path: ".symlinks/plugins/video_player_web/ios"
+  path_provider_foundation:
+    :path: ".symlinks/plugins/path_provider_foundation/darwin"
+  rtmp_broadcaster:
+    :path: ".symlinks/plugins/rtmp_broadcaster/ios"
+  video_player_avfoundation:
+    :path: ".symlinks/plugins/video_player_avfoundation/ios"
   wakelock:
     :path: ".symlinks/plugins/wakelock/ios"
 
 SPEC CHECKSUMS:
-  e2e: d0c9f8c832b4cc7ab386d0c0f0af67fe5ac0c3bd
-  Flutter: 0e3d915762c693b495b44d77113d4970485de6ec
+  Flutter: f04841e97a9d0b0a8025694d0796dd46242b2854
   HaishinKit: d1786896ace24065d466bde02356c5352ac001b0
   Logboard: e74ec2d9941abd22f4db3a3ddcd0735011df92c7
-  path_provider: abfe2b5c733d04e238b0d8691db0cfd63a27a93c
-  path_provider_macos: f760a3c5b04357c380e2fddb6f9db6f3015897e0
-  rtmp_publisher: fd78622f86c6cc2df07513f60d4cc01dcaeed720
-  video_player: 9cc823b1d9da7e8427ee591e8438bfbcde500e6e
-  video_player_web: da8cadb8274ed4f8dbee8d7171b420dedd437ce7
-  wakelock: 0d4a70faf8950410735e3f61fb15d517c8a6efc4
+  path_provider_foundation: c68054786f1b4f3343858c1e1d0caaded73f0be9
+  rtmp_broadcaster: 83acb312407c26d2b629f545689fcf0db26a7750
+  video_player_avfoundation: 6d971a232d72e6ee25368378d48a079dea01f1cf
+  wakelock: d0fc7c864128eac40eba1617cb5264d9c940b46f
 
-PODFILE CHECKSUM: 5ad0ed810cbdac0f1ca562f55b31d98323e4e507
+PODFILE CHECKSUM: 3d89a90682e2cd438911ad748b8ba5992f8b6a0e
 
-COCOAPODS: 1.9.3
+COCOAPODS: 1.12.1
