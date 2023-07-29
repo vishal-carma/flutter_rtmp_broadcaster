@@ -523,7 +523,7 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         if (_videoWriter.status != AVAssetWriterStatusWriting) {
             [_videoWriter startWriting];
             [_videoWriter startSessionAtSourceTime:currentSampleTime];
-            [self newAudioSample:sampleBuffer];
+            // [self newAudioSample:sampleBuffer];
         }
         
         if (output == _captureVideoOutput) {
