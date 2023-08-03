@@ -1,6 +1,8 @@
 ## 2.2.0
 
 * Fixed a bitrate issue on iOS that was preventing the stream and recording of the video
+* Removed outdated test suite
+
 
 ## 2.1.3
 
