@@ -1,90 +1,84 @@
 # Flutter RTMP broadcaster
 
-RTMP streaming and camera plugin.
+Extend the functionality of the Flutter camera plugin with this plugin. Seamlessly integrate RTMP streaming into your Android and iOS applications, while excluding web platforms.
 
-## Getting Started
+Utilize a consistent API structure similar to the camera plugin, preserving existing installation requirements. A distinctive feature is the introduction of the `startStreaming(url)` API, enabling developers to initiate real-time streaming to a designated RTMP URL.
 
-This plugin is an extension of the Flutter
-[camera plugin](https://pub.dev/packages/camera) to add in
-rtmp streaming as part of the system. It works on android and iOS
-(but not web).
-
-This means the API Is exactly the same as the camera and
-installation requirements are the same. The different is there
-is an extra API that is startStreaming(url) that takes an rtmp
-url and starts streaming to that specific url.
-
-For android I
-use [rtmp-rtsp-stream-client-java](https://github.com/pedroSG94/rtmp-rtsp-stream-client-java)
-and for iOS I use
-[HaishinKit.swift](https://github.com/shogo4405/HaishinKit.swift)
+This plugin employs established tools:
+- Android leverages [rtmp-rtsp-stream-client-java](https://github.com/pedroSG94/rtmp-rtsp-stream-client-java).
+- iOS integration involves [HaishinKit.swift](https://github.com/shogo4405/HaishinKit.swift).
 
 ## Features:
 
-* Display live camera preview in a widget.
-* Snapshots can be captured and saved to a file.
-* Record video.
-* Add access to the image stream from Dart.
+- Seamlessly embed live camera previews within widgets
+- Capture snapshots, conveniently saving them to files
+- Enable video recording capabilities
+- Access image streams directly from Dart
 
-## Installation
+## Usage
 
-First, add `camera` as a [dependency in your pubspec.yaml file](https://flutter.io/using-packages/).
+Using this plugin is as easy as using the original [camera plugin](https://pub.dev/packages/camera), but it extends the controller with more functionalities. You can find here a list of the supported new APIs.
+
+| Function | Description |
+|----------|-------------|
+| `startVideoStreaming(String url, {int bitrate = 1200 * 1024, bool? androidUseOpenGL})` | Initiates video streaming to an RTMP endpoint. |
+| `startVideoRecordingAndStreaming(String filePath, String url, {int bitrate = 1200 * 1024, bool? androidUseOpenGL})` | Initiates video streaming to an RTMP endpoint while simultaneously saving a high-quality version to a local file. |
+| `pauseVideoStreaming()` | Pauses an ongoing video stream. |
+| `resumeVideoStreaming()` | Resumes a paused video stream. |
+| `stopEverything()` | Halts ongoing video streaming and recording processes. |
+| ... | ... |
+
+
+## Getting started
+
+To quickly integrate this plugin into your Flutter project, follow the platform-specific instructions below.
 
 ### iOS
 
-Add two rows to the `ios/Runner/Info.plist`:
+To get started on iOS, follow these steps:
 
-* one with the key `Privacy - Camera Usage Description` and a usage description.
-* and one with the key `Privacy - Microphone Usage Description` and a usage description.
+1. Open the `ios/Runner/Info.plist` file.
+2. Add the following two rows to the `Info.plist` file:
+   - Key: `Privacy - Camera Usage Description`
+     Value: A description of why your app needs access to the camera.
+   - Key: `Privacy - Microphone Usage Description`
+     Value: A description of why your app needs access to the microphone.
 
-Or in text format add the key:
+Or in text format add the keys:
 
-```
-    <key>NSAppTransportSecurity</key>
-    <dict>
-    <key>NSAllowsArbitraryLoads</key>
-    <true/>
-    </dict>
-    <key>NSPhotoLibraryUsageDescription</key>
-    <string></string>
-    <key>UIBackgroundModes</key>
-    <array>
-    <string>processing</string>
-    </array>
+```xml
     <key>NSCameraUsageDescription</key>
     <string>App requires access to the camera for live streaming feature.</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>App requires access to the microphone for live streaming feature.</string>
 ```
 
-## Example
-
-To see an example implementation of this plugin, please refer to
-the [example code](https://github.com/emiliodallatorre/flutter_rtmp_publisher/tree/master/example).
-This includes a demonstration of how to use the `rtmp_publisher` plugin to stream live video to MUX,
-as well as how to capture snapshots and record video. Simply clone the repository and run the app on
-an Android or iOS device.
-
 ### Android
 
-Change the minimum Android sdk version to 21 (or higher) in your `android/app/build.gradle` file.
+To get started with the **Flutter RTMP Streaming Plugin** on Android, follow these steps:
 
-```
-    minSdkVersion 21
-```
+1. Open your `android/app/build.gradle` file.
+2. Change the minimum Android SDK version to 21 or higher by modifying the `minSdkVersion` value:
+   ```groovy
+   minSdkVersion 21
+   ```
+3. Next, open your `android/app/build.gradle` file.
+4. Inside the `android` block, add the following code to the `packagingOptions` section to prevent packaging issues:
+   ```groovy
+   android {
+       // ... other configurations
 
-and add the following part to your `android/app/src/build.gradle` file:
+       packagingOptions {
+           exclude 'project.clj'
+       }
+   }
+    ```
 
-```
-android {
-    ...
-    packagingOptions {
-        exclude 'project.clj'
-    }
-}
-```
+These adjustments will ensure compatibility and address packaging concerns for your Android implementation.
 
-in order to prevent packaging problems.
+## Example
+
+For an illustrative implementation of this plugin, you can explore the [example code](https://github.com/emiliodallatorre/flutter_rtmp_publisher/tree/master/example). This provides a practical showcase of utilizing the `rtmp_publisher` plugin to facilitate real-time video streaming to MUX. Additionally, the example demonstrates snapshot capturing and video recording. To explore further, clone the repository and execute the app on either an Android or iOS device.
 
 # Note for MUX Server
 
