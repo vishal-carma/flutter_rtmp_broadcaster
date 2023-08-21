@@ -15,6 +15,16 @@ This plugin employs established tools:
 - Enable video recording capabilities
 - Access image streams directly from Dart
 
+## Support Development ☕
+
+Developing and maintaining this plugin takes time and effort. If you find this plugin useful and would like to show your appreciation, consider making a donation. Your contributions help ensure the continued development and improvement of the plugin. 🚀
+
+You can make a donation and buy me a cup of coffee to keep the momentum going:
+
+[!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/emiliodallatorre)
+
+Your support is invaluable, and every donation is deeply appreciated. Thank you for helping to make this plugin even better! 🙏
+
 ## Usage
 
 Using this plugin is as easy as using the original [camera plugin](https://pub.dev/packages/camera), but it extends the controller with more functionalities. You can find here a list of the supported new APIs.
