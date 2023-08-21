@@ -78,7 +78,7 @@ These adjustments will ensure compatibility and address packaging concerns for y
 
 ## Example
 
-For an illustrative implementation of this plugin, you can explore the [example code](https://github.com/emiliodallatorre/flutter_rtmp_publisher/tree/master/example). This provides a practical showcase of utilizing the `rtmp_publisher` plugin to facilitate real-time video streaming to MUX. Additionally, the example demonstrates snapshot capturing and video recording. To explore further, clone the repository and execute the app on either an Android or iOS device.
+For an illustrative implementation of this plugin, you can explore the [example code](https://github.com/emiliodallatorre/flutter_rtmp_broadcaster/tree/master/example). This provides a practical showcase of utilizing the `rtmp_publisher` plugin to facilitate real-time video streaming to MUX. Additionally, the example demonstrates snapshot capturing and video recording. To explore further, clone the repository and execute the app on either an Android or iOS device.
 
 # Note for MUX Server
 
