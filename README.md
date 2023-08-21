@@ -28,7 +28,6 @@ Using this plugin is as easy as using the original [camera plugin](https://pub.d
 | `stopEverything()` | Halts ongoing video streaming and recording processes. |
 | ... | ... |
 
-
 ## Getting started
 
 To quickly integrate this plugin into your Flutter project, follow the platform-specific instructions below.
@@ -80,8 +79,21 @@ These adjustments will ensure compatibility and address packaging concerns for y
 
 For an illustrative implementation of this plugin, you can explore the [example code](https://github.com/emiliodallatorre/flutter_rtmp_broadcaster/tree/master/example). This provides a practical showcase of utilizing the `rtmp_publisher` plugin to facilitate real-time video streaming to MUX. Additionally, the example demonstrates snapshot capturing and video recording. To explore further, clone the repository and execute the app on either an Android or iOS device.
 
-# Note for MUX Server
+## Troubleshooting & issues
 
-* RTMP Url (for publisher): rtmp://live.mux.com/app/${streamkey}
-* Stream Url (for client): https://stream.mux.com/${playbackId}.m3u8
-* Poster Url (for preview): https://image.mux.com/${playbackId}/thumbnail.jpg
+If you encounter any issues while using this plugin, don't hesitate to seek assistance. To report problems or unexpected behavior, please open an issue on the [GitHub repository](https://github.com/emiliodallatorre/flutter_rtmp_broadcaster). I will do my best to address the issues and provide solutions. However, please understand that my availability for addressing issues is limited due to time constraints.
+
+For those in need of expedited and prioritized support, I offer paid fast support services. If you require immediate assistance, personalized guidance, or customized solutions, feel free to reach out to me at [info@emiliodallatorre.it](mailto:info@emiliodallatorre.it) to discuss potential support options.
+
+Your feedback is crucial in improving this plugin's functionality and ensuring its reliability. Thank you for contributing to the ongoing development of this plugin!
+
+## Contributing
+
+Contributions to this plugin are highly encouraged and greatly appreciated. If you have ideas for enhancements, bug fixes, or new features, please feel free to contribute. To get started, follow these steps:
+
+1. Fork the repository and create a new branch for your contribution.
+2. Make your desired changes or additions.
+3. Ensure your code is properly formatted and tested.
+4. Submit a pull request with a detailed explanation of your changes.
+
+Your contributions play a vital role in improving the plugin and benefiting the entire community. Thank you for taking the time to enhance this plugin!
