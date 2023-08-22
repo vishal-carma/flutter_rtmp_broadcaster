@@ -1,3 +1,7 @@
+## 2.2.2
+
+* Updated the license with the explicit permission of the original developer David Bennett
+
 ## 2.2.1
 
 * Updated README.md
