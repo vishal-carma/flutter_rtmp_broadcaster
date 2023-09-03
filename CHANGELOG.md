@@ -1,3 +1,7 @@
+## 2.2.3
+
+* Fixed video recording on Android
+
 ## 2.2.2
 
 * Updated the license with the explicit permission of the original developer David Bennett
