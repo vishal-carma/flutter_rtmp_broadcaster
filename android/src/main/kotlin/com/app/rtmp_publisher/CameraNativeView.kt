@@ -23,14 +23,15 @@ import java.io.*
 
 
 class CameraNativeView(
-        private var activity: Activity? = null,
-        private var enableAudio: Boolean = false,
-        private val preset: Camera.ResolutionPreset,
-        private var cameraName: String,
-        private var dartMessenger: DartMessenger? = null) :
-        PlatformView,
-        SurfaceHolder.Callback,
-        ConnectCheckerRtmp {
+    private var activity: Activity? = null,
+    private var enableAudio: Boolean = false,
+    private val preset: Camera.ResolutionPreset,
+    private var cameraName: String,
+    private var dartMessenger: DartMessenger? = null
+) :
+    PlatformView,
+    SurfaceHolder.Callback,
+    ConnectCheckerRtmp {
 
     private val glView = LightOpenGlView(activity)
     private val rtmpCamera: RtmpCamera2
@@ -98,7 +99,7 @@ class CameraNativeView(
 
     fun takePicture(filePath: String, result: MethodChannel.Result) {
         Log.d("CameraNativeView", "takePicture filePath: $filePath result: $result")
-        val file = File(filePath)
+        val file: File = File(filePath)
         if (file.exists()) {
             result.error("fileExists", "File at path '$filePath' already exists. Cannot overwrite.", null)
             return
@@ -116,13 +117,40 @@ class CameraNativeView(
     }
 
     fun startVideoRecording(filePath: String?, result: MethodChannel.Result) {
+        if (filePath == null) {
+            result.error("fileExists", "Must specify a filePath.", null)
+            return
+        }
+
         val file = File(filePath)
         if (file.exists()) {
             result.error("fileExists", "File at path '$filePath' already exists. Cannot overwrite.", null)
             return
         }
         Log.d("CameraNativeView", "startVideoRecording filePath: $filePath result: $result")
+
+
+        val streamingSize = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, preset)
+        /*if (rtmpCamera.isRecording || rtmpCamera.prepareAudio() && rtmpCamera.prepareVideo(
+                streamingSize.videoFrameWidth,
+                streamingSize.videoFrameHeight,
+                streamingSize.videoBitRate
+            )*/
+
+        if (!rtmpCamera.isStreaming()) {
+            if (rtmpCamera.prepareAudio() && rtmpCamera.prepareVideo(
+                    streamingSize.videoFrameWidth,
+                    streamingSize.videoFrameHeight,
+                    streamingSize.videoBitRate
+                )
+            ) {
+                rtmpCamera.startRecord(filePath)
+            }
+        } else {
+            rtmpCamera.startRecord(filePath)
+        }
     }
+
 
     fun startVideoStreaming(url: String?, result: MethodChannel.Result) {
         Log.d("CameraNativeView", "startVideoStreaming url: $url")
@@ -135,9 +163,11 @@ class CameraNativeView(
             if (!rtmpCamera.isStreaming) {
                 val streamingSize = CameraUtils.getBestAvailableCamcorderProfileForResolutionPreset(cameraName, preset)
                 if (rtmpCamera.isRecording || rtmpCamera.prepareAudio() && rtmpCamera.prepareVideo(
-                                streamingSize.videoFrameWidth,
-                                streamingSize.videoFrameHeight,
-                                streamingSize.videoBitRate)) {
+                        streamingSize.videoFrameWidth,
+                        streamingSize.videoFrameHeight,
+                        streamingSize.videoBitRate
+                    )
+                ) {
                     // ready to start streaming
                     rtmpCamera.startStream(url)
                 } else {
@@ -155,10 +185,27 @@ class CameraNativeView(
         }
     }
 
-    fun startVideoRecordingAndStreaming(filePath: String?, url: String?, result: MethodChannel.Result) {
-        Log.d("CameraNativeView", "startVideoStreaming url: $url")
-        // TODO: Implement video recording
-        startVideoStreaming(url, result)
+    fun startVideoRecordingAndStreaming(filePath: String?, url: String?, bitrate: Int?, result: MethodChannel.Result) {
+        if (filePath == null) {
+            result.error("fileExists", "Must specify a filePath.", null)
+            return
+        }
+        if (File(filePath).exists()) {
+            result.error("fileExists", "File at path '$filePath' already exists.", null)
+            return
+        }
+        if (url == null) {
+            result.error("fileExists", "Must specify a url.", null)
+            return
+        }
+        try {
+            startVideoRecording(filePath, result)
+            startVideoStreaming(url, result)
+        } catch (e: CameraAccessException) {
+            result.error("videoRecordingFailed", e.message, null)
+        } catch (e: IOException) {
+            result.error("videoRecordingFailed", e.message, null)
+        }
     }
 
     fun pauseVideoStreaming(result: Any) {

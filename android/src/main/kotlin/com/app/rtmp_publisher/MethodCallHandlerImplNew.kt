@@ -19,11 +19,12 @@ import io.flutter.embedding.engine.FlutterEngine
 import java.util.HashMap
 
 class MethodCallHandlerImplNew(
-        private val activity: Activity,
-        private val messenger: BinaryMessenger,
-        private val cameraPermissions: CameraPermissions,
-        private val permissionsRegistry: PermissionStuff,
-        private val flutterEngine: FlutterEngine) : MethodCallHandler {
+    private val activity: Activity,
+    private val messenger: BinaryMessenger,
+    private val cameraPermissions: CameraPermissions,
+    private val permissionsRegistry: PermissionStuff,
+    private val flutterEngine: FlutterEngine
+) : MethodCallHandler {
 
     private val methodChannel: MethodChannel
     private val imageStreamChannel: EventChannel
@@ -42,9 +43,9 @@ class MethodCallHandlerImplNew(
         nativeViewFactory = NativeViewFactory(activity)
 
         flutterEngine
-                .platformViewsController
-                .registry
-                .registerViewFactory("hybrid-view-type", nativeViewFactory as NativeViewFactory)
+            .platformViewsController
+            .registry
+            .registerViewFactory("hybrid-view-type", nativeViewFactory as NativeViewFactory)
     }
 
     @RequiresApi(Build.VERSION_CODES.LOLLIPOP)
@@ -56,80 +57,97 @@ class MethodCallHandlerImplNew(
             } catch (e: Exception) {
                 handleException(e, result)
             }
+
             "initialize" -> {
                 Log.i("Stuff", "initialize")
                 cameraPermissions.requestPermissions(
-                        activity,
-                        permissionsRegistry,
-                        call.argument("enableAudio")!!,
-                        object : ResultCallback {
-                            override fun onResult(errorCode: String?, errorDescription: String?) {
-                                if (errorCode == null) {
-                                    try {
-                                        instantiateCamera(call, result)
-                                    } catch (e: Exception) {
-                                        handleException(e, result)
-                                    }
-                                } else {
-                                    result.error(errorCode, errorDescription, null)
+                    activity,
+                    permissionsRegistry,
+                    call.argument("enableAudio")!!,
+                    object : ResultCallback {
+                        override fun onResult(errorCode: String?, errorDescription: String?) {
+                            if (errorCode == null) {
+                                try {
+                                    instantiateCamera(call, result)
+                                } catch (e: Exception) {
+                                    handleException(e, result)
                                 }
+                            } else {
+                                result.error(errorCode, errorDescription, null)
                             }
-                        })
+                        }
+                    })
             }
+
             "takePicture" -> {
                 Log.i("Stuff", "takePicture")
                 getCameraView()?.takePicture(call.argument("path")!!, result)
             }
+
             "prepareForVideoRecording" -> {
                 Log.i("Stuff", "prepareForVideoRecording")
                 // This optimization is not required for Android.
                 result.success(null)
             }
+
             "startVideoRecording" -> {
                 Log.i("Stuff", "startVideoRecording")
                 getCameraView()?.startVideoRecording(call.argument("filePath")!!, result)
             }
+
             "startVideoStreaming" -> {
                 Log.i("Stuff", "startVideoStreaming ${call.arguments}")
                 getCameraView()?.startVideoStreaming(
-                        call.argument("url"),
-                        result)
+                    call.argument("url"),
+                    result
+                )
             }
+
             "startVideoRecordingAndStreaming" -> {
                 Log.i("Stuff", "startVideoRecordingAndStreaming ${call.arguments}")
                 getCameraView()?.startVideoRecordingAndStreaming(
-                        call.argument("filePath"),
-                        call.argument("url"),
-                        result)
+                    call.argument("filePath"),
+                    call.argument("url"),
+                    call.argument("bitrate"),
+                    result
+                )
             }
+
             "pauseVideoStreaming" -> {
                 Log.i("Stuff", "pauseVideoStreaming")
                 getCameraView()?.pauseVideoStreaming(result)
             }
+
             "resumeVideoStreaming" -> {
                 Log.i("Stuff", "resumeVideoStreaming")
                 getCameraView()?.resumeVideoStreaming(result)
             }
+
             "stopRecordingOrStreaming" -> {
                 Log.i("Stuff", "stopRecordingOrStreaming")
                 getCameraView()?.stopVideoRecordingOrStreaming(result)
             }
+
             "stopRecording" -> {
                 Log.i("Stuff", "stopRecording")
                 getCameraView()?.stopVideoRecording(result)
             }
+
             "stopStreaming" -> {
                 Log.i("Stuff", "stopStreaming")
                 getCameraView()?.stopVideoStreaming(result)
             }
+
             "pauseVideoRecording" -> {
                 Log.i("Stuff", "pauseVideoRecording")
                 getCameraView()?.pauseVideoRecording(result)
             }
+
             "resumeVideoRecording" -> {
                 Log.i("Stuff", "resumeVideoRecording")
                 getCameraView()?.resumeVideoRecording(result)
             }
+
             "startImageStream" -> {
                 Log.i("Stuff", "startImageStream")
                 try {
@@ -139,6 +157,7 @@ class MethodCallHandlerImplNew(
                     handleException(e, result)
                 }
             }
+
             "stopImageStream" -> {
                 Log.i("Stuff", "startImageStream")
                 try {
@@ -148,6 +167,7 @@ class MethodCallHandlerImplNew(
                     handleException(e, result)
                 }
             }
+
             "getStreamStatistics" -> {
                 Log.i("Stuff", "getStreamStatistics")
                 try {
@@ -156,11 +176,13 @@ class MethodCallHandlerImplNew(
                     handleException(e, result)
                 }
             }
+
             "dispose" -> {
                 Log.i("Stuff", "dispose")
                 // Native camera view handles the view lifecircle by themselves
                 result.success(null)
             }
+
             else -> result.notImplemented()
         }
     }
@@ -175,7 +197,7 @@ class MethodCallHandlerImplNew(
         handler.postDelayed({
             val cameraName = call.argument<String>("cameraName") ?: "0"
             val resolutionPreset = call.argument<String>("resolutionPreset")
-                    ?: "low"
+                ?: "low"
             val enableAudio = call.argument<Boolean>("enableAudio")!!
             dartMessenger = DartMessenger(messenger, textureId)
 
@@ -186,7 +208,10 @@ class MethodCallHandlerImplNew(
             reply["previewWidth"] = previewSize.width
             reply["previewHeight"] = previewSize.height
             reply["previewQuarterTurns"] = currentOrientation / 90
-            Log.i("TAG", "open: width: " + reply["previewWidth"] + " height: " + reply["previewHeight"] + " currentOrientation: " + currentOrientation + " quarterTurns: " + reply["previewQuarterTurns"])
+            Log.i(
+                "TAG",
+                "open: width: " + reply["previewWidth"] + " height: " + reply["previewHeight"] + " currentOrientation: " + currentOrientation + " quarterTurns: " + reply["previewQuarterTurns"]
+            )
             // TODO Refactor cameraView initialisation
             nativeViewFactory?.cameraName = cameraName
             nativeViewFactory?.preset = preset

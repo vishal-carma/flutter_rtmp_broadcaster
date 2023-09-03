@@ -784,7 +784,7 @@ class CameraController extends ValueNotifier<CameraValue> {
         'bitrate': bitrate,
       });
       value =
-          value.copyWith(isStreamingVideoRtmp: true, isStreamingPaused: false);
+          value.copyWith(isStreamingVideoRtmp: true, isStreamingPaused: false, isRecordingVideo: true, isRecordingPaused: false);
     } on PlatformException catch (e) {
       throw CameraException(e.code, e.message);
     }
