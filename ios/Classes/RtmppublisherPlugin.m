@@ -733,6 +733,11 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         if (bitrate == nil || bitrate == 0) {
             bitrate = [NSNumber numberWithInt:160 * 1000];
         }
+        
+        // TODO: FIX
+        // [self newAudioSample:sampleBuffer];
+        [self setStreamingSessionPreset:_streamingPreset];
+        
         [_rtmpStream openWithUrl:url width: _streamingSize.width height: _streamingSize.height bitrate: bitrate.integerValue];
         _isStreaming = YES;
         _isStreamingPaused = NO;
@@ -760,6 +765,13 @@ didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer
         if (bitrate == nil || bitrate == 0) {
             bitrate = [NSNumber numberWithInt:160 * 1000];
         }
+
+        [self setStreamingSessionPreset:_streamingPreset];
+
+        // Print width and height
+        NSLog(@"width: %f", _streamingSize.width);
+        NSLog(@"height: %f", _streamingSize.height);
+
         [_rtmpStream openWithUrl:url width: _streamingSize.width height: _streamingSize.height bitrate: bitrate.integerValue];
         _isStreaming = YES;
         _isStreamingPaused = NO;
