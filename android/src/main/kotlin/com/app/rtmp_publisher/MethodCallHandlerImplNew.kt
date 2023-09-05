@@ -99,6 +99,7 @@ class MethodCallHandlerImplNew(
                 Log.i("Stuff", "startVideoStreaming ${call.arguments}")
                 getCameraView()?.startVideoStreaming(
                     call.argument("url"),
+                    call.argument("bitrate"),
                     result
                 )
             }

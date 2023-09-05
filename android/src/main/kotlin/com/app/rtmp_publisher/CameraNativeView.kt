@@ -152,7 +152,7 @@ class CameraNativeView(
     }
 
 
-    fun startVideoStreaming(url: String?, result: MethodChannel.Result) {
+    fun startVideoStreaming(url: String?, bitrate: Int?, result: MethodChannel.Result) {
         Log.d("CameraNativeView", "startVideoStreaming url: $url")
         if (url == null) {
             result.error("startVideoStreaming", "Must specify a url.", null)
@@ -165,7 +165,7 @@ class CameraNativeView(
                 if (rtmpCamera.isRecording || rtmpCamera.prepareAudio() && rtmpCamera.prepareVideo(
                         streamingSize.videoFrameWidth,
                         streamingSize.videoFrameHeight,
-                        streamingSize.videoBitRate
+                        bitrate ?: streamingSize.videoBitRate
                     )
                 ) {
                     // ready to start streaming
@@ -200,7 +200,7 @@ class CameraNativeView(
         }
         try {
             startVideoRecording(filePath, result)
-            startVideoStreaming(url, result)
+            startVideoStreaming(url, bitrate, result)
         } catch (e: CameraAccessException) {
             result.error("videoRecordingFailed", e.message, null)
         } catch (e: IOException) {
