@@ -36,7 +36,6 @@ Using this plugin is as easy as using the original [camera plugin](https://pub.d
 | `pauseVideoStreaming()` | Pauses an ongoing video stream. |
 | `resumeVideoStreaming()` | Resumes a paused video stream. |
 | `stopEverything()` | Halts ongoing video streaming and recording processes. |
-| ... | ... |
 
 ## Getting started
 
