@@ -1,3 +1,11 @@
+## 2.2.6
+
+* Fixed SDK contraints for Flutter 4.0.0
+
+## 2.2.5
+
+* Fixed old Flutter dependency usage
+
 ## 2.2.3
 
 * Fixed video recording on Android
