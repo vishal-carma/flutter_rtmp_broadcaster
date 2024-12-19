@@ -27,7 +27,7 @@ apply plugin: 'kotlin-android'
 
 android {
     namespace 'com.app.rtmp_publisher'
-    compileSdkVersion 28
+    compileSdkVersion 33
     buildToolsVersion "33.0.1"
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
