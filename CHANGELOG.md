@@ -1,4 +1,4 @@
-## 2.3.3
+## 2.3.4
 
 * Updated Dependencies
 * Bumped Flutter min Version to 3.22.0 and Dart SDK min Version to 3.4.0
