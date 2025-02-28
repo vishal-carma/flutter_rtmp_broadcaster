@@ -1,4 +1,4 @@
-## TBD
+## 2.3.3
 
 * Updated Dependencies
 * Bumped Flutter min Version to 3.22.0 and Dart SDK min Version to 3.4.0
@@ -6,11 +6,7 @@
 * Gradle: Specified buildToolsVersion to 33.0.1
 * Gradle: Replaced jcenter with mavenCentral
 * Gradle: Specified source/targetCompatibility and jvmTarget to 1.8
-
-
-## 2.3.3
-
-* Merged [PR #27](https://github.com/emiliodallatorre/flutter_rtmp_broadcaster/pull/27) to fix Gradle 8 compatibility and old dependencies
+* The credits for this version go to @OlJhonny, who called out [PR #27](https://github.com/emiliodallatorre/flutter_rtmp_broadcaster/pull/27) to fix Gradle 8 compatibility and old dependencies
 
 
 ## 2.2.6
