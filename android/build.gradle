@@ -51,6 +51,7 @@ dependencies {
     implementation 'androidx.annotation:annotation:1.1.0'
     implementation 'com.android.support:support-v4:28.0.0'
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
-    implementation 'com.github.vishal-carma:rtmp-rtsp-stream-client-java:d284d73'
+    implementation 'com.github.vishal-carma:rtmp-rtsp-stream-client-java:v1.0.0'
+'
     // implementation 'com.github.pedroSG94.rtmp-rtsp-stream-client-java:rtplibrary:1.9.6'
 }
